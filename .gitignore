@@ -6,4 +6,3 @@ build/
 .pytest_cache/
 .adaptive_intelligence/
 .mypy_cache/
-./paper
