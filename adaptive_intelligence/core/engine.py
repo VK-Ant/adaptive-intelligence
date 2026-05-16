@@ -64,7 +64,7 @@ class AdaptiveAI:
 
         # Setup logging
         setup_logging(config.log_level, config.log_file)
-        logger.info(f"Initializing Adaptive Intelligence v1.0.1")
+        logger.info(f"Initializing Adaptive Intelligence v1.0.3")
 
         # Storage directory
         self._storage_dir = Path(config.storage_dir)
@@ -109,6 +109,7 @@ class AdaptiveAI:
         # State tracking
         self._is_ingested = False
         self._total_queries = 0
+        self._system_prompt = kwargs.get("system_prompt", None)
 
         logger.info(
             f"Engine initialized: llm={config.llm_backend.value}/{config.llm_model}, "
@@ -224,7 +225,8 @@ class AdaptiveAI:
     # ─── Query ─────────────────────────────────────────────────────────
 
     def ask(self, query: str, priority: Optional[str] = None,
-            depth: Optional[int] = None) -> AdaptiveResponse:
+            depth: Optional[int] = None,
+            system_prompt: Optional[str] = None) -> AdaptiveResponse:
         """Ask a question over your ingested documents.
 
         This is where the magic happens:
@@ -308,15 +310,20 @@ class AdaptiveAI:
 
         if self._llm:
             try:
-                system_prompt = (
-                    "You are an intelligent document analysis assistant. "
-                    "Answer questions based strictly on the provided context. "
-                    "Cite sources for every claim. If information is not in the "
-                    "context, say so clearly."
+                # Priority: ask() param > init param > default
+                active_system_prompt = (
+                    system_prompt
+                    or self._system_prompt
+                    or (
+                        "You are an intelligent document analysis assistant. "
+                        "Answer questions based strictly on the provided context. "
+                        "Cite sources for every claim. If information is not in the "
+                        "context, say so clearly."
+                    )
                 )
                 llm_response = self._llm.generate(
                     prompt=prompt,
-                    system_prompt=system_prompt,
+                    system_prompt=active_system_prompt,
                     temperature=self.config.temperature,
                     max_tokens=self.config.max_tokens,
                 )
@@ -587,7 +594,7 @@ class AdaptiveAI:
     def status(self) -> Dict[str, Any]:
         """Get complete system status."""
         return {
-            "version": "1.0.1",
+            "version": "1.0.3",
             "documents_indexed": self.vector_index.count(),
             "total_queries": self._total_queries,
             "llm_provider": self._llm.provider_name if self._llm else "none",
@@ -598,6 +605,21 @@ class AdaptiveAI:
             "graph_edges": self.graph.edge_count,
             "average_accuracy": self.evaluation.get_average_score(),
         }
+
+    def set_system_prompt(self, prompt: str):
+        """Set a custom system prompt for all future queries.
+
+        Args:
+            prompt: The system prompt string. Set to None to reset to default.
+
+        Example:
+            engine.set_system_prompt(
+                "You are a financial analyst. Always cite page numbers. "
+                "Use bullet points for key findings."
+            )
+        """
+        self._system_prompt = prompt
+        logger.info(f"System prompt updated ({len(prompt)} chars)" if prompt else "System prompt reset to default")
 
     def reset(self):
         """Reset all state (indexes, memory, RL policy, graph)."""

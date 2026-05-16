@@ -221,7 +221,7 @@ engine = AdaptiveAI(config=config)
 
 ## Architecture - Summary
 
-![systemarchitecure](docs/images/Screenshot%202026-05-16%20075927.png)
+![](docs/images/Screenshot%202026-05-16%20075927.png)
 
 - User Query enters the system as natural language.
 
@@ -243,6 +243,56 @@ engine = AdaptiveAI(config=config)
 
 - Response returns the answer with confidence score, sources, and audit trail.
 
+---
+
+## System Prompt
+
+Customize the LLM's behavior at three levels:
+
+```python
+# Level 1: Set at init (applies to all queries)
+engine = AdaptiveAI(
+    llm_backend="openai",
+    api_key="...",
+    system_prompt="You are a financial analyst. Always cite page numbers. Use bullet points for key findings."
+)
+
+# Level 2: Override per query
+response = engine.ask(
+    "What are the key risks?",
+    system_prompt="You are a risk specialist. Rate each risk HIGH/MEDIUM/LOW."
+)
+
+# Level 3: Update anytime
+engine.set_system_prompt(
+    "You are a legal compliance reviewer. Flag regulatory violations. Cite clause numbers."
+)
+
+# Reset to default
+engine.set_system_prompt(None)
+```
+
+Priority: `ask()` param → `init` param → default.
+
+---
+
+## FAQ
+
+**Q: How does ingestion handle mixed content (text + tables) from PDFs?**
+
+Tables are extracted with structure preserved (`is_table=True`) and indexed into the same Vector + Keyword indexes as text. The RL policy learns to use the `table_first` retrieval route for structured queries. Separation happens at retrieval time via learned routing, not at ingestion time.
+
+**Q: How is this different from just using ChatGPT / Claude?**
+
+Adaptive Intelligence is not an LLM — it's the retrieval layer that decides what context to feed TO the LLM. It uses ChatGPT, Claude, Grok, or Ollama as backends. The system learns which retrieval strategy works best for each query type on YOUR specific documents. No LLM can do that alone.
+
+**Q: Does the RL policy persist across sessions?**
+
+Yes. The RL policy state, learning memory, and vector index are saved to the `storage_dir` (default: `.adaptive_intelligence/`). The system picks up where it left off.
+
+**Q: Can I use this without an LLM (offline)?**
+
+Yes. Without an LLM, `engine.ask()` returns ranked source excerpts directly from the retrieved chunks. The RL policy, graph, and evaluation still work — only the synthesis step falls back to direct excerpts.
 
 ---
 
