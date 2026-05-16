@@ -221,23 +221,7 @@ engine = AdaptiveAI(config=config)
 
 ## Architecture
 
-```
-Query → Trigger Interpreter → RL Policy Decision → Retrieval
-                                    ↓                   ↓
-                              Graph Traversal    Vector + Keyword
-                              (conditional)      (hybrid RRF)
-                                    ↓                   ↓
-                              Adaptive Prompt ← ────────┘
-                                    ↓
-                              LLM Generation
-                                    ↓
-                              Evaluation Engine
-                                    ↓
-                    ┌───────────────┼───────────────┐
-                    ↓               ↓               ↓
-              RL Update      Memory Update    Prompt Evolution
-              (reward)       (patterns)       (template scores)
-```
+![systemarchitecure](docs/images/Screenshot%202026-05-16%20075927.png)
 
 ---
 
