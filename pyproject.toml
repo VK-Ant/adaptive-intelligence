@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "adaptive-intelligence"
-version = "1.0.1"
+version = "1.0.2"
 description = "Self-improving retrieval orchestration framework with RL-based routing, conditional graph activation, and evaluation-driven learning."
 readme = "README.md"
 license = {text = "Apache-2.0"}

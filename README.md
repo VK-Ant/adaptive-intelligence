@@ -219,9 +219,30 @@ engine = AdaptiveAI(config=config)
 
 ---
 
-## Architecture
+## Architecture - Summary
 
 ![systemarchitecure](docs/images/Screenshot%202026-05-16%20075927.png)
+
+- User Query enters the system as natural language.
+
+- Trigger Interpreter classifies query type, complexity, domain, and extracts entities.
+
+- RL Policy Engine selects the optimal retrieval strategy using Thompson Sampling.
+
+- Retrieval Orchestrator queries the chosen index (Vector, Keyword, Graph, Table, or Hybrid).
+
+- Graph Index activates only when a five-signal gate detects relationship reasoning is needed.
+
+- Adaptive Prompt Engine builds a domain-aware prompt from evolving templates.
+
+- LLM Generation produces the answer using any model (Ollama, OpenAI, Grok, Claude).
+
+- Evaluation Engine scores the answer on faithfulness, relevance, hallucination, and citations.
+
+- Reward Signal feeds the evaluation score back to update the RL policy.
+
+- Response returns the answer with confidence score, sources, and audit trail.
+
 
 ---
 
