@@ -4,21 +4,21 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "adaptive-intelligence"
-version = "0.1.0"
+version = "1.0.0"
 description = "Self-improving retrieval orchestration framework with RL-based routing, conditional graph activation, and evaluation-driven learning."
 readme = "README.md"
 license = {text = "Apache-2.0"}
 requires-python = ">=3.9"
 authors = [
-    {name = "Venkatkumar R", email = "venkatkumarr.vk99@gmail.com"},
+    {name = "Venkatkumar Rajan", email = "venkatkumarr.vk99@gmail.com"},
 ]
 keywords = [
     "rag", "retrieval", "reinforcement-learning", "knowledge-graph",
     "document-intelligence", "adaptive", "self-improving",
-    "llm", "ai", "nlp", "evaluation",
+    "llm", "ai", "nlp", "evaluation", "self-learning",
 ]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: Apache Software License",
@@ -36,6 +36,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+openai = ["openai>=1.0.0"]
+groq = ["openai>=1.0.0"]
 pdf = ["PyMuPDF>=1.23.0"]
 docx = ["python-docx>=1.0.0"]
 xlsx = ["openpyxl>=3.1.0"]
@@ -58,10 +60,12 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/VK-Ant/adaptive-intelligence"
+Homepage = "https://pypi.org/project/adaptive-intelligence/"
 Documentation = "https://github.com/VK-Ant/adaptive-intelligence#readme"
 Repository = "https://github.com/VK-Ant/adaptive-intelligence"
 Issues = "https://github.com/VK-Ant/adaptive-intelligence/issues"
+PyPI = "https://pypi.org/project/adaptive-intelligence/"
+Portfolio = "https://vk-ant.github.io/Venkatkumar/"
 
 [tool.setuptools.packages.find]
 include = ["adaptive_intelligence*"]

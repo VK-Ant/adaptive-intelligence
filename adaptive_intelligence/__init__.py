@@ -14,8 +14,8 @@ Usage:
     print(response.citations)
 """
 
-__version__ = "0.1.0"
-__author__ = "VK Venkatkumar"
+__version__ = "1.0.0"
+__author__ = "Venkatkumar Rajan"
 
 from adaptive_intelligence.core.engine import AdaptiveAI
 from adaptive_intelligence.core.response import AdaptiveResponse

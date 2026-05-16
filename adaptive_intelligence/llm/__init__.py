@@ -119,13 +119,27 @@ class OllamaProvider(BaseLLMProvider):
 
 
 class OpenAIProvider(BaseLLMProvider):
-    """OpenAI-compatible API provider (works with OpenAI, Grok, Together, vLLM, etc.)."""
+    """OpenAI-compatible API provider (works with OpenAI, Grok, Groq, Together, vLLM, etc.)."""
 
     def __init__(self, model: str = "gpt-4o", api_key: Optional[str] = None,
                  base_url: str = "https://api.openai.com/v1"):
         self.model = model
         self.api_key = api_key
         self.base_url = base_url.rstrip("/")
+        self._client = None
+        self._use_sdk = False
+        self._init_client()
+
+    def _init_client(self):
+        """Try to use the openai SDK (handles auth, retries, streaming properly)."""
+        try:
+            from openai import OpenAI
+            self._client = OpenAI(api_key=self.api_key, base_url=self.base_url)
+            self._use_sdk = True
+            logger.info(f"Using openai SDK for {self.base_url}")
+        except ImportError:
+            self._use_sdk = False
+            logger.info("openai SDK not installed, using urllib fallback")
 
     @property
     def provider_name(self) -> str:
@@ -136,6 +150,47 @@ class OpenAIProvider(BaseLLMProvider):
 
     def generate(self, prompt: str, system_prompt: Optional[str] = None,
                  temperature: float = 0.1, max_tokens: int = 2048) -> LLMResponse:
+        if self._use_sdk:
+            return self._generate_sdk(prompt, system_prompt, temperature, max_tokens)
+        return self._generate_urllib(prompt, system_prompt, temperature, max_tokens)
+
+    def _generate_sdk(self, prompt: str, system_prompt: Optional[str] = None,
+                      temperature: float = 0.1, max_tokens: int = 2048) -> LLMResponse:
+        """Generate using the openai Python SDK (recommended)."""
+        start = time.time()
+
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": prompt})
+
+        try:
+            response = self._client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
+
+            latency = time.time() - start
+            text = response.choices[0].message.content or ""
+            usage = response.usage
+
+            return LLMResponse(
+                text=text,
+                model=self.model,
+                provider="openai",
+                input_tokens=usage.prompt_tokens if usage else 0,
+                output_tokens=usage.completion_tokens if usage else 0,
+                latency_seconds=latency,
+            )
+        except Exception as e:
+            logger.error(f"OpenAI SDK generation failed: {e}")
+            raise ConnectionError(f"OpenAI API error: {e}")
+
+    def _generate_urllib(self, prompt: str, system_prompt: Optional[str] = None,
+                         temperature: float = 0.1, max_tokens: int = 2048) -> LLMResponse:
+        """Fallback: generate using urllib (no SDK dependency)."""
         import urllib.request
 
         start = time.time()
@@ -180,7 +235,7 @@ class OpenAIProvider(BaseLLMProvider):
                 latency_seconds=latency,
             )
         except Exception as e:
-            logger.error(f"OpenAI generation failed: {e}")
+            logger.error(f"OpenAI urllib generation failed: {e}")
             raise ConnectionError(f"OpenAI API error: {e}")
 
 

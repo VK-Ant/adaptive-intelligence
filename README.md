@@ -1,102 +1,52 @@
-# Adaptive Intelligence
+# adaptive-intelligence
 
-**Self-improving retrieval orchestration that learns from every query.**
+Self-improving retrieval orchestration framework for document intelligence. Drop documents, ask questions, the system learns how to retrieve better over time.
 
-[![PyPI](https://img.shields.io/pypi/v/adaptive-intelligence)](https://pypi.org/project/adaptive-intelligence/)
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+RL-based retrieval routing, conditional graph activation, evaluation-driven learning, and zero-configuration architecture. Works with any LLM.
 
-Most RAG systems use static retrieval pipelines — same strategy for every query, no learning, no adaptation. Adaptive Intelligence changes that. It uses **reinforcement learning** to discover the optimal retrieval strategy for each query type, **conditional graph activation** to enable relationship reasoning only when needed, and **evaluation-driven feedback loops** to measurably improve over time.
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/VK-Ant/adaptive-intelligence/blob/main/notebooks/traditional_rag_vs_adaptive_intelligence.ipynb)
 
-```python
-from adaptive_intelligence import AdaptiveAI
+- PyPI: https://pypi.org/project/adaptive-intelligence
+- GitHub: https://github.com/VK-Ant/adaptive-intelligence
+- Portfolio: https://vk-ant.github.io/Venkatkumar
 
-engine = AdaptiveAI()
-engine.ingest("./documents")
-response = engine.ask("What are the key operational risks?")
+## Install
 
-print(response.answer)       # Synthesized answer
-print(response.confidence)   # 0.87
-print(response.evaluation.display())  # Full quality metrics
 ```
-
-Three lines to start. The system handles everything else — and gets better with every query.
-
----
-
-## What Makes This Different
-
-### 1. RL-Based Retrieval Routing
-
-Instead of hardcoded rules ("always use hybrid search"), Adaptive Intelligence uses **contextual bandits with Thompson Sampling** to learn which retrieval strategy works best for which type of query:
-
-- First 15 queries: heuristic defaults (keyword for factual, vector for semantic, hybrid for complex)
-- After warmup: the RL policy selects from 6 strategies (vector, keyword, hybrid, table-first, graph-first, graph-hybrid), choosing depth, graph activation, prompt template, and verification level
-- Every response is evaluated → evaluation score becomes the RL reward → policy updates
-
-The system discovers patterns like "financial extraction queries work best with keyword search at depth 8" without being told.
-
-### 2. Conditional Graph Activation
-
-Knowledge graphs are powerful but expensive. Adaptive Intelligence builds an entity-relationship graph from your documents automatically, but only activates graph traversal when the query actually needs relational reasoning. Five signals gate activation:
-
-- Relationship words in query ("connected", "depends on", "affects")
-- Entity density (multiple entities that might be related)
-- Query complexity (multi-hop reasoning detected)
-- Historical success rate (did graph help for this query type before?)
-- RL policy recommendation
-
-### 3. Self-Adaptive Retrieval
-
-The system measurably improves through an evaluation-driven feedback loop:
-
-- **Layer 1** (always on): Automatic metrics — faithfulness, relevance, citation accuracy, hallucination risk, retrieval precision/recall
-- **Layer 2** (when L1 confidence is low): LLM-as-Judge evaluation
-- **Layer 3** (periodic): Cross-reference consistency checks
-
-The composite evaluation score feeds back as the RL reward signal, closing the loop.
-
----
-
-## Installation
-
-```bash
 pip install adaptive-intelligence
-```
-
-For document format support:
-```bash
-# PDF support
-pip install adaptive-intelligence[pdf]
-
-# All document formats (PDF, DOCX, XLSX, PPTX)
-pip install adaptive-intelligence[all]
-
-# HuggingFace models (local, any model)
-pip install adaptive-intelligence[huggingface]
-
-# Development
-pip install adaptive-intelligence[dev]
+pip install adaptive-intelligence[pdf]          # adds PDF support
+pip install adaptive-intelligence[all]          # all document formats
+pip install adaptive-intelligence[huggingface]  # local HuggingFace models
 ```
 
 ---
 
 ## Quick Start
 
-### Local LLM (Free, Private)
-
 ```python
 from adaptive_intelligence import AdaptiveAI
 
-# Uses Ollama by default (install: https://ollama.ai, then: ollama pull llama3.2)
+# Zero config — defaults to Ollama (free, local, private)
 engine = AdaptiveAI()
 engine.ingest("./documents")
-response = engine.ask("What is the total revenue for Q3?")
+response = engine.ask("What are the key operational risks?")
+
+print(response.answer)
+print(f"Confidence: {response.confidence:.0%}")
+print(response.evaluation.display())
 ```
 
-### Cloud LLM
-
 ```python
+# With Grok API
+engine = AdaptiveAI(
+    llm_backend="openai",
+    llm_model="grok-3-mini",
+    api_key="xai-...",
+    base_url="https://api.x.ai/v1",
+    domain="financial",
+)
+
+# With OpenAI
 engine = AdaptiveAI(
     llm_backend="openai",
     llm_model="gpt-4o",
@@ -104,111 +54,167 @@ engine = AdaptiveAI(
 )
 ```
 
-### Domain-Specific
+---
 
-```python
-engine = AdaptiveAI(
-    domain="financial",         # financial, legal, healthcare, technical, operational
-    security_level="high",      # standard, high, maximum
-)
-```
+## What Makes This Different
+
+| | Traditional RAG | Adaptive Intelligence |
+|---|---|---|
+| Retrieval | Static vector similarity | RL-learned routing (6 strategies) |
+| Graph | None | Conditional activation (5-signal gate) |
+| Prompts | Fixed template | Domain-adaptive, evolving |
+| Learning | Same performance forever | Improves with each query |
+| Evaluation | Manual | Automatic 6-metric + RL reward |
 
 ---
 
-## Three Levels of Access
+## Three Core Innovations
 
-**Level 0 (80% of users)** — Three lines, zero configuration:
+### 1. RL Policy Engine
+
+Contextual bandits with Thompson Sampling learn which retrieval strategy works best for each query type. First 15 queries use heuristic defaults, then RL takes over. No hardcoded rules.
+
 ```python
-engine = AdaptiveAI()
-engine.ingest("./docs")
-response = engine.ask("query")
+# The RL policy decides per query:
+# - Retrieval route: vector, keyword, hybrid, table-first, graph-hybrid
+# - Retrieval depth: 3, 5, 8, 10, 15 chunks
+# - Graph activation: on/off
+# - Prompt template: extraction, analysis, summary, comparison
+# - Verification level: none, citation, full
 ```
 
-**Level 1 (15%)** — Domain, provider, security:
-```python
-engine = AdaptiveAI(
-    domain="financial",
-    llm_backend="openai",
-    api_key="sk-...",
-    security_level="high",
-)
-```
+### 2. Conditional Graph Activation
 
-**Level 2 (5%)** — Full control over RL, graph, evaluation:
-```python
-from adaptive_intelligence.core.config import AdaptiveConfig, RLConfig, GraphConfig
+Knowledge graph built automatically during ingestion. Activated only when the query needs relational reasoning — not wasted on simple factual lookups.
 
-config = AdaptiveConfig(
-    rl=RLConfig(warmup_queries=20, exploration_rate=0.15),
-    graph=GraphConfig(max_hops=3, conditional_activation=True),
-)
-engine = AdaptiveAI(config=config)
+Five signals gate activation: relationship words, query analysis, entity density, complexity, historical success rate.
+
+### 3. Self-Adaptive Retrieval
+
+Every response evaluated on 6 metrics. Composite score becomes RL reward. System measurably improves over queries.
+
+```python
+# Evaluation metrics (all automatic, no ground truth needed):
+# - Faithfulness: grounded in source documents?
+# - Relevance: addresses the query?
+# - Citation accuracy: sources cited?
+# - Hallucination risk: fabricated content?
+# - Retrieval precision: relevant chunks retrieved?
+# - Retrieval recall: query terms covered?
 ```
 
 ---
 
 ## Supported Formats
 
-| Format | Extension | Required Package |
-|--------|-----------|-----------------|
-| Text / Markdown | .txt, .md | — |
-| CSV | .csv | — |
-| JSON | .json | — |
-| HTML | .html | — |
-| XML | .xml | — |
-| PDF | .pdf | `PyMuPDF` or `pdfplumber` |
-| Word | .docx | `python-docx` |
-| Excel | .xlsx | `openpyxl` |
-| PowerPoint | .pptx | `python-pptx` |
-| Images (OCR) | .png, .jpg | `pytesseract`, `Pillow` |
+| S.No. | Format | Extension | Required Package |
+|-------|--------|-----------|-----------------|
+| 1 | Text / Markdown | .txt, .md | — |
+| 2 | CSV | .csv | — |
+| 3 | JSON | .json | — |
+| 4 | HTML | .html | — |
+| 5 | XML | .xml | — |
+| 6 | PDF | .pdf | `PyMuPDF` or `pdfplumber` |
+| 7 | Word | .docx | `python-docx` |
+| 8 | Excel | .xlsx | `openpyxl` |
+| 9 | PowerPoint | .pptx | `python-pptx` |
+| 10 | Images (OCR) | .png, .jpg | `pytesseract`, `Pillow` |
+
+## Supported LLM Providers
+
+| S.No. | Provider | Backend | Local? | Free? |
+|-------|----------|---------|--------|-------|
+| 1 | Ollama | `ollama` | Yes | Yes |
+| 2 | OpenAI | `openai` | No | No |
+| 3 | Grok (xAI) | `openai` | No | No |
+| 4 | Azure OpenAI | `azure_openai` | No | No |
+| 5 | Groq | `groq` | No | Free tier |
+| 6 | Together AI | `together` | No | Free tier |
+| 7 | HuggingFace | `huggingface` | Yes | Yes |
+| 8 | Any OpenAI-compatible | `custom` | Varies | Varies |
 
 ---
 
-## LLM Providers
+## Code Examples
 
-| Provider | Backend | Local? | Free? |
-|----------|---------|--------|-------|
-| Ollama | `ollama` | ✓ | ✓ |
-| OpenAI | `openai` | ✗ | ✗ |
-| Azure OpenAI | `azure_openai` | ✗ | ✗ |
-| Groq | `groq` | ✗ | Free tier |
-| Together AI | `together` | ✗ | Free tier |
-| HuggingFace | `huggingface` | ✓ | ✓ |
-| Any OpenAI-compatible | `custom` | varies | varies |
+### Inspect the Full Pipeline
 
----
-
-## Monitoring
-
-### Dashboard
 ```python
+response = engine.ask("Compare Q2 and Q3 revenue")
+
+# What did the system understand?
+print(response.query_analysis)
+
+# What strategy did the RL policy choose?
+pd = response.policy_decision
+print(f"Route: {pd.retrieval_route}")
+print(f"Graph: {pd.graph_activation}")
+print(f"Explored: {pd.was_exploration}")
+
+# Evaluation scores
+print(response.evaluation.display())
+
+# Citations
+for c in response.citations:
+    print(f"  {c.source_document} ({c.confidence:.0%})")
+```
+
+### Dashboard and Monitoring
+
+```python
+# System dashboard
 print(engine.dashboard())
-```
-```
-┌─────────────────────────────────────────────────────────┐
-│  ADAPTIVE INTELLIGENCE DASHBOARD                        │
-│  Documents Indexed:       247                           │
-│  Queries Processed:        38                           │
-│  Average Accuracy:       82.3%                          │
-│  Improvement Rate:       +14.7%                         │
-│  RL Policy:              Active                         │
-│  Exploration Rate:        8.2%                          │
-│  Arms Learned:             12                           │
-│  Graph Nodes:             156                           │
-│  Graph Edges:             284                           │
-└─────────────────────────────────────────────────────────┘
-```
 
-### Learning Curve
-```python
+# RL policy stats
+stats = engine.rl.get_stats()
+print(f"Warmup: {stats['is_warmup']}")
+print(f"Arms learned: {stats['total_arms']}")
+print(f"Exploration: {stats['exploration_rate']:.1%}")
+
+# Learning curve data
 curve = engine.learning_curve()
-# [{"query_number": 1, "reward": 0.65, "rolling_avg": 0.65}, ...]
+
+# Learning memory
+print(engine.memory.get_learning_summary())
+
+# Audit trail
+print(engine.audit.display_query_trail(response.query_id))
+engine.audit.export("audit.json")
 ```
 
-### Audit Trail
+### Advanced Configuration
+
 ```python
-trail = engine.audit.display_query_trail(response.query_id)
-engine.audit.export("audit.json")
+from adaptive_intelligence.core.config import (
+    AdaptiveConfig, RLConfig, GraphConfig, EvaluationConfig,
+    LLMBackend, Domain, SecurityLevel,
+)
+
+config = AdaptiveConfig(
+    llm_backend=LLMBackend.OLLAMA,
+    llm_model="llama3.2",
+    domain=Domain.FINANCIAL,
+    security_level=SecurityLevel.HIGH,
+
+    rl=RLConfig(
+        warmup_queries=20,
+        exploration_rate=0.15,
+        algorithm="thompson_sampling",
+    ),
+
+    graph=GraphConfig(
+        enabled=True,
+        conditional_activation=True,
+        max_hops=3,
+    ),
+
+    evaluation=EvaluationConfig(
+        faithfulness_weight=0.35,
+        enable_llm_judge=True,
+    ),
+)
+
+engine = AdaptiveAI(config=config)
 ```
 
 ---
@@ -235,25 +241,31 @@ Query → Trigger Interpreter → RL Policy Decision → Retrieval
 
 ---
 
-## Citation
+## Also by the Author
 
-If you use Adaptive Intelligence in research:
+- **[llmevalkit](https://pypi.org/project/llmevalkit/)** — LLM evaluation, hallucination detection, compliance, and 61 metrics
+- **[Responsible AI Series](https://medium.com/@VK_Venkatkumar)** — HIPAA, GDPR, NIST AI RMF, CoSAI, EU AI Act
+
+## Citation
 
 ```bibtex
 @software{venkatkumar2026adaptive,
   title={Adaptive Intelligence: Self-Improving Retrieval Orchestration via Evaluation-Driven Policy Learning},
-  author={Venkatkumar, VK},
+  author={Venkatkumar, Rajan},
   year={2026},
   url={https://github.com/VK-Ant/adaptive-intelligence}
 }
 ```
 
----
-
 ## License
 
-Apache License 2.0. See [LICENSE](LICENSE).
+Apache License 2.0
 
----
+## Author
 
-Built by [Venkatkumar_VK](https://www.linkedin.com/in/venkatkumarvk/)
+Venkatkumar Rajan
+
+- LinkedIn: https://linkedin.com/in/venkatkumarvk
+- GitHub: https://github.com/VK-Ant
+- Portfolio: https://vk-ant.github.io/Venkatkumar/
+- PyPI: https://pypi.org/project/adaptive-intelligence/

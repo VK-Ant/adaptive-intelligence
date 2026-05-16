@@ -64,7 +64,7 @@ class AdaptiveAI:
 
         # Setup logging
         setup_logging(config.log_level, config.log_file)
-        logger.info(f"Initializing Adaptive Intelligence v0.1.0")
+        logger.info(f"Initializing Adaptive Intelligence v1.0.0")
 
         # Storage directory
         self._storage_dir = Path(config.storage_dir)
@@ -587,7 +587,7 @@ class AdaptiveAI:
     def status(self) -> Dict[str, Any]:
         """Get complete system status."""
         return {
-            "version": "0.1.0",
+            "version": "1.0.0",
             "documents_indexed": self.vector_index.count(),
             "total_queries": self._total_queries,
             "llm_provider": self._llm.provider_name if self._llm else "none",
