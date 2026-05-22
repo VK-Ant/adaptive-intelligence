@@ -15,6 +15,7 @@ class LLMBackend(str, Enum):
     GROQ = "groq"
     TOGETHER = "together"
     CUSTOM = "custom"
+    NONE = "none"
 
 
 class SecurityLevel(str, Enum):

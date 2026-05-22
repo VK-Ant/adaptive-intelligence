@@ -28,6 +28,8 @@ class RetrievalRoute(str, Enum):
     TABLE_FIRST = "table_first"
     GRAPH_FIRST = "graph_first"
     GRAPH_HYBRID = "graph_hybrid"
+    PAGE_BM25 = "page_bm25"
+    PAGE_GRAPH = "page_graph"
 
 
 @dataclass

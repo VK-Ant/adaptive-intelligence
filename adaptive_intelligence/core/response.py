@@ -94,6 +94,7 @@ class AdaptiveResponse:
     timestamp: datetime = field(default_factory=datetime.now)
     query_id: str = ""
     raw_chunks: List[Dict[str, Any]] = field(default_factory=list)
+    structured: Any = None  # v2: parsed JSON/CSV/DataFrame output
 
     @property
     def retrieval_strategy(self) -> str:

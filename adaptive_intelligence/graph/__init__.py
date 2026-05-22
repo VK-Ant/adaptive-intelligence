@@ -347,3 +347,60 @@ class KnowledgeGraph:
         self._edges.clear()
         self._adjacency.clear()
         self._reverse_adjacency.clear()
+
+    def save(self, filepath: str):
+        """Persist graph to disk."""
+        import json
+        from pathlib import Path
+        Path(filepath).parent.mkdir(parents=True, exist_ok=True)
+        state = {
+            "nodes": {
+                nid: {"label": n.label, "entity_type": n.entity_type,
+                      "properties": n.properties, "source_chunks": n.source_chunks}
+                for nid, n in self._nodes.items()
+            },
+            "edges": [
+                {"source_id": e.source_id, "target_id": e.target_id,
+                 "relation": e.relation, "weight": e.weight,
+                 "source_chunk": e.source_chunk}
+                for e in self._edges
+            ],
+            "activation_count": self._activation_count,
+            "activation_success_count": self._activation_success_count,
+        }
+        with open(filepath, "w") as f:
+            json.dump(state, f)
+        logger.info(f"Graph saved: {self.node_count} nodes, {self.edge_count} edges")
+
+    def load(self, filepath: str):
+        """Load graph from disk."""
+        import json
+        from pathlib import Path
+        if not Path(filepath).exists():
+            return
+        with open(filepath) as f:
+            state = json.load(f)
+
+        self.clear()
+        for nid, data in state.get("nodes", {}).items():
+            node = GraphNode(
+                node_id=nid, label=data["label"],
+                entity_type=data["entity_type"],
+                properties=data.get("properties", {}),
+                source_chunks=data.get("source_chunks", []),
+            )
+            self._nodes[nid] = node
+
+        for edata in state.get("edges", []):
+            edge = GraphEdge(
+                source_id=edata["source_id"], target_id=edata["target_id"],
+                relation=edata["relation"], weight=edata.get("weight", 1.0),
+                source_chunk=edata.get("source_chunk", ""),
+            )
+            self._edges.append(edge)
+            self._adjacency[edge.source_id].append(edge)
+            self._reverse_adjacency[edge.target_id].append(edge)
+
+        self._activation_count = state.get("activation_count", 0)
+        self._activation_success_count = state.get("activation_success_count", 0)
+        logger.info(f"Graph loaded: {self.node_count} nodes, {self.edge_count} edges")

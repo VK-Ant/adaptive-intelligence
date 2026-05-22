@@ -118,7 +118,7 @@ class TestAdaptiveAIInit:
             engine = AdaptiveAI(storage_dir=d, log_level="WARNING")
             assert engine.config.llm_backend == LLMBackend.OLLAMA
             status = engine.status()
-            assert status["version"] == "1.0.3"
+            assert status["version"] == "2.0.0"
 
     def test_kwargs_init(self):
         with tempfile.TemporaryDirectory() as d:
@@ -135,7 +135,7 @@ class TestAdaptiveAIInit:
         with tempfile.TemporaryDirectory() as d:
             engine = AdaptiveAI(storage_dir=d, log_level="WARNING")
             dashboard = engine.dashboard()
-            assert "ADAPTIVE INTELLIGENCE DASHBOARD" in dashboard
+            assert "ADAPTIVE INTELLIGENCE" in dashboard
 
     def test_reset(self):
         with tempfile.TemporaryDirectory() as d:

@@ -255,6 +255,16 @@ class LearningMemory:
         except Exception as e:
             logger.warning(f"Failed to load learning memory: {e}")
 
+    def record_feedback(self, query_id: str, rating: str, reason: str = None):
+        """Record user feedback for a query."""
+        self._feedback_log = getattr(self, '_feedback_log', [])
+        self._feedback_log.append({
+            "query_id": query_id,
+            "rating": rating,
+            "reason": reason,
+            "timestamp": time.time(),
+        })
+
     def clear(self):
         """Clear all memory."""
         self._routing_patterns.clear()

@@ -141,3 +141,36 @@ class KeywordIndex(BaseIndex):
 
     def count(self) -> int:
         return len(self._chunks)
+
+    def save(self, filepath: str):
+        """Persist keyword index to disk."""
+        import pickle
+        from pathlib import Path
+        Path(filepath).parent.mkdir(parents=True, exist_ok=True)
+        state = {
+            "chunks": self._chunks,
+            "tokenized_docs": self._tokenized_docs,
+            "doc_freqs": self._doc_freqs,
+            "idf_cache": self._idf_cache,
+            "avg_dl": self._avg_dl,
+            "built": self._built,
+        }
+        with open(filepath, "wb") as f:
+            pickle.dump(state, f)
+        logger.info(f"Keyword index saved: {len(self._chunks)} entries")
+
+    def load(self, filepath: str):
+        """Load keyword index from disk."""
+        import pickle
+        from pathlib import Path
+        if not Path(filepath).exists():
+            return
+        with open(filepath, "rb") as f:
+            state = pickle.load(f)
+        self._chunks = state["chunks"]
+        self._tokenized_docs = state["tokenized_docs"]
+        self._doc_freqs = state["doc_freqs"]
+        self._idf_cache = state["idf_cache"]
+        self._avg_dl = state["avg_dl"]
+        self._built = state["built"]
+        logger.info(f"Keyword index loaded: {len(self._chunks)} entries")
