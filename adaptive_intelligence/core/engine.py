@@ -76,7 +76,7 @@ class AdaptiveAI:
 
         # Setup
         setup_logging(config.log_level, config.log_file)
-        logger.info(f"Initializing Adaptive Intelligence v2.0.0")
+        logger.info(f"Initializing Adaptive Intelligence v2.0.1")
 
         self._storage_dir = Path(config.storage_dir)
         self._storage_dir.mkdir(parents=True, exist_ok=True)
@@ -748,7 +748,7 @@ class AdaptiveAI:
 
     def status(self) -> Dict[str, Any]:
         return {
-            "version": "2.0.0",
+            "version": "2.0.1",
             "vectorless": self._vectorless,
             "documents_indexed": self.page_index.count() if self._vectorless else (self.vector_index.count() if self.vector_index else 0),
             "total_queries": self._total_queries,

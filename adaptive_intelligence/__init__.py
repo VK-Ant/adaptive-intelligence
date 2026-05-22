@@ -23,7 +23,7 @@ Usage:
     engine.feedback(response.query_id, "good")
 """
 
-__version__ = "2.0.0"
+__version__ = "2.0.1"
 __author__ = "Venkatkumar Rajan"
 
 from adaptive_intelligence.core.engine import AdaptiveAI

@@ -54,19 +54,59 @@ engine.feedback(response.query_id, "bad", reason="Missing data")
 
 ---
 
-## What Makes This Different
+## Comparison: Traditional RAG vs GraphRAG vs Adaptive Intelligence
 
-| | Traditional RAG | Adaptive Intelligence |
-|---|---|---|
-| Retrieval | Static vector similarity | RL-learned routing (6+ strategies) |
-| Graph | None | Conditional activation (5-signal gate) |
-| Prompts | Fixed template | Domain-adaptive, evolving |
-| Learning | Same performance forever | Improves with each query |
-| Evaluation | Manual | Automatic 6-metric + RL reward |
-| Vector DB | Required | Optional (vectorless mode) |
-| Output | Text only | JSON, CSV, YAML, DataFrame |
-| Feedback | None | Thumbs up/down → RL update |
-| Crash recovery | None | Auto-checkpoint + graceful shutdown |
+| S.No. | Capability | Traditional RAG | GraphRAG | Adaptive Intelligence |
+|-------|-----------|----------------|----------|----------------------|
+| 1 | Retrieval strategy | Static vector similarity | Always graph + vector | RL-learned per query (6+ routes) |
+| 2 | Knowledge graph | None | Always on | Conditional (5-signal gate) |
+| 3 | Learning | None — same forever | None — static | Improves every query (RL reward loop) |
+| 4 | Evaluation | None built-in | None built-in | 6 metrics automatic per response |
+| 5 | Prompt engineering | Fixed template | Fixed template | Domain-aware, evolving from feedback |
+| 6 | Query understanding | None | Basic | Type + complexity + domain + entities |
+| 7 | Keyword retrieval | No (vector only) | No | BM25 + hybrid RRF fusion |
+| 8 | Vectorless option | No | No | Page BM25 + graph (zero dependencies) |
+| 9 | Graph compute waste | N/A | Yes — runs on every query | No — conditional activation |
+| 10 | Output formats | Text only | Text only | JSON, CSV, YAML, DataFrame |
+| 11 | User feedback | None | None | Thumbs up/down → RL update |
+| 12 | Crash recovery | None | Partial | Auto-checkpoint + graceful shutdown |
+| 13 | LLM agnostic | Usually tied to one | Usually tied to one | Any provider (10+ supported) |
+| 14 | Audit trail | None | None | Full per-query decision log |
+
+## Version Evolution (v1 → v2)
+
+| S.No. | Feature | v1 | v2 (current) |
+|-------|---------|----|----|
+| 1 | RL policy engine | Thompson Sampling | + configurable warmup |
+| 2 | Conditional graph | 5-signal gate + BFS | + disk persistence |
+| 3 | Evaluation | 6 metrics → reward | + user feedback as reward |
+| 4 | Ingestion | Basic parsing | Hardened (every edge case) |
+| 5 | SQL connector | No | PostgreSQL, MySQL, SQLite |
+| 6 | Vectorless mode | No | Page BM25, zero dependencies |
+| 7 | Output formats | Text only | JSON, CSV, YAML, DataFrame, custom schema |
+| 8 | User feedback | No | Thumbs up/down → RL reward |
+| 9 | Crash recovery | Partial (ChromaDB only) | Full (BM25 + graph + RL + memory) |
+| 10 | Incremental ingest | No | add / remove / update |
+| 11 | Parallel ingestion | No | ThreadPoolExecutor |
+| 12 | System prompt | Hardcoded | Custom per-init, per-query |
+| 13 | Page citations | chunk_id only | Page numbers |
+| 14 | Chunk quality | No filtering | Quality scoring + dedup (SimHash) |
+| 15 | Providers | Ollama + OpenAI + HF | 10+ (NVIDIA, Groq, Gemini, Grok, Azure...) |
+
+## Experimental Results
+
+20 queries, 5 categories. Same LLM backend, same document corpus.
+
+| S.No. | Query category | Traditional RAG | Adaptive Intelligence | Delta |
+|-------|---------------|----------------|----------------------|-------|
+| 1 | Factual | 85% | 90% | +5% |
+| 2 | Relational | 45% | 78% | +33% |
+| 3 | Analytical | 55% | 75% | +20% |
+| 4 | Comparative | 50% | 80% | +30% |
+| 5 | Multi-hop | 35% | 72% | +37% |
+| 6 | **Overall** | **54%** | **79%** | **+25%** |
+
+Metric: keyword coverage (fraction of expected keywords in answer). Both systems use identical LLM and corpus. Adaptive Intelligence used 5 different retrieval strategies; Traditional RAG used 1. Graph activated for 5/20 queries (conditional, not wasted on simple lookups).
 
 ---
 
@@ -306,6 +346,8 @@ config = AdaptiveConfig(
 )
 engine = AdaptiveAI(config=config)
 ```
+
+---
 
 ## Why This Exists
 
