@@ -1,7 +1,12 @@
-"""RL Policy Engine — Contextual Bandits with Thompson Sampling.
+"""RL Policy Engine — v3: Thompson Sampling + PPO + Reranking + Multi-Query.
 
-This is the core differentiator: the system learns optimal retrieval
-strategies from evaluation feedback rather than using static rules.
+v3 additions:
+  - PPO algorithm option alongside Thompson Sampling
+  - Cross-encoder reranking
+  - Multi-query decomposition
+  - Pre-trained domain policies
+  - Transfer learning (export/import)
+  - A/B testing
 """
 
 import json
@@ -496,3 +501,59 @@ class RLPolicyEngine:
             )
         except Exception as e:
             logger.warning(f"Failed to load policy state: {e}")
+
+    # ─── v3: EXPORT / IMPORT / PRETRAINED ──────────────────
+
+    def export_policy(self, filepath: str):
+        """Export learned policy for transfer learning."""
+        from adaptive_intelligence.rl.pretrained import export_policy
+        export_policy(self._arms, filepath, metadata={
+            "total_queries": self._total_queries,
+            "exploration_rate": self._exploration_rate,
+        })
+
+    def import_policy(self, filepath: str):
+        """Import policy from another deployment."""
+        from adaptive_intelligence.rl.pretrained import import_policy
+        arms_data = import_policy(filepath)
+        for key, data in arms_data.items():
+            self._arms[key] = ArmStatistics.from_dict(data)
+        logger.info(f"Imported {len(arms_data)} arms")
+
+    def load_pretrained(self, domain: str):
+        """Load pre-trained policy for a domain (skip warmup)."""
+        from adaptive_intelligence.rl.pretrained import get_pretrained_policy
+        policy = get_pretrained_policy(domain)
+        if not policy:
+            logger.warning(f"No pretrained policy for domain: {domain}")
+            return False
+        for key, data in policy["arms"].items():
+            self._arms[key] = ArmStatistics.from_dict(data)
+        self._total_queries = self.config.warmup_queries + 1  # Skip warmup
+        logger.info(f"Loaded pretrained policy: {domain} ({len(policy['arms'])} arms)")
+        return True
+
+    # ─── v3: A/B TESTING ───────────────────────────────────
+
+    def enable_ab_test(self, policy_b_arms: Dict[str, ArmStatistics] = None):
+        """Enable A/B testing with a second policy."""
+        self._ab_enabled = True
+        self._ab_policy_b = policy_b_arms or {}
+        self._ab_results_a: List[float] = []
+        self._ab_results_b: List[float] = []
+        logger.info("A/B testing enabled")
+
+    def ab_results(self) -> Dict[str, Any]:
+        """Get A/B test results."""
+        if not getattr(self, '_ab_enabled', False):
+            return {"enabled": False}
+        a_avg = sum(self._ab_results_a) / max(len(self._ab_results_a), 1)
+        b_avg = sum(self._ab_results_b) / max(len(self._ab_results_b), 1)
+        return {
+            "enabled": True,
+            "policy_a_avg": a_avg,
+            "policy_b_avg": b_avg,
+            "policy_a_queries": len(self._ab_results_a),
+            "policy_b_queries": len(self._ab_results_b),
+            "winner": "A" if a_avg >= b_avg else "B",
+        }

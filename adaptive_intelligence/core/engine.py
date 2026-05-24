@@ -1,21 +1,21 @@
-"""AdaptiveAI — The Main Orchestrator (v2).
+"""AdaptiveAI — The Main Orchestrator (v3).
 
-v2 additions: vectorless mode, output formats, user feedback,
-crash recovery, incremental ingestion, SQL connector, page citations.
+v3 additions: PPO algorithm, cross-encoder reranking, multi-query
+decomposition, pre-trained domain policies, transfer learning, A/B testing.
 
 Usage:
     engine = AdaptiveAI()
     engine.ingest("./documents")
     response = engine.ask("What are the key risks?")
 
-    # v2: vectorless
-    engine = AdaptiveAI(vectorless=True)
+    # v3: PPO
+    engine = AdaptiveAI(rl_algorithm="ppo")
 
-    # v2: output formats
-    response = engine.ask("Extract vendors", output_format="json")
+    # v3: reranking
+    engine = AdaptiveAI(reranking=True)
 
-    # v2: feedback
-    engine.feedback(response.query_id, "good")
+    # v3: pretrained policy
+    engine = AdaptiveAI(domain="financial", pretrained_policy=True)
 """
 
 import json
@@ -50,17 +50,15 @@ logger = logging.getLogger(__name__)
 
 
 class AdaptiveAI:
-    """Self-improving retrieval orchestration engine — v2.
+    """Self-improving retrieval orchestration engine — v3.
 
-    v2 new features:
-        - vectorless mode (no ChromaDB, no embeddings)
-        - output_format: json, csv, yaml, dataframe
-        - user feedback → RL reward
-        - crash recovery (auto-checkpoint)
-        - incremental ingestion (add/remove/update)
-        - SQL connector
-        - page-level citations
-        - configurable warmup
+    v3 new features:
+        - rl_algorithm: "thompson" (default) or "ppo"
+        - reranking: cross-encoder re-scoring of retrieved chunks
+        - multi-query: auto-decompose complex queries into sub-queries
+        - pretrained_policy: skip warmup with domain-specific policy
+        - export_policy / import_policy: transfer learning
+        - enable_ab_test: compare two policies simultaneously
     """
 
     def __init__(self, config: Optional[AdaptiveConfig] = None, **kwargs):
@@ -76,7 +74,7 @@ class AdaptiveAI:
 
         # Setup
         setup_logging(config.log_level, config.log_file)
-        logger.info(f"Initializing Adaptive Intelligence v2.0.1")
+        logger.info(f"Initializing Adaptive Intelligence v3.0.0")
 
         self._storage_dir = Path(config.storage_dir)
         self._storage_dir.mkdir(parents=True, exist_ok=True)
@@ -146,9 +144,45 @@ class AdaptiveAI:
         self._last_checkpoint = time.time()
         atexit.register(self._on_shutdown)
 
+        # v3: Reranking
+        self._reranking = kwargs.get("reranking", False)
+        self._reranker = None
+        if self._reranking:
+            try:
+                from adaptive_intelligence.rl.reranker import CrossEncoderReranker
+                self._reranker = CrossEncoderReranker()
+                if not self._reranker.is_available:
+                    from adaptive_intelligence.rl.reranker import KeywordReranker
+                    self._reranker = KeywordReranker()
+                    logger.info("Using keyword reranker (install sentence-transformers for cross-encoder)")
+            except Exception:
+                from adaptive_intelligence.rl.reranker import KeywordReranker
+                self._reranker = KeywordReranker()
+
+        # v3: Multi-query decomposition
+        self._multi_query = kwargs.get("multi_query", True)
+        if self._multi_query:
+            from adaptive_intelligence.rl.multi_query import MultiQueryDecomposer
+            self._decomposer = MultiQueryDecomposer()
+        else:
+            self._decomposer = None
+
+        # v3: Pre-trained policy
+        if kwargs.get("pretrained_policy", False):
+            domain_str = config.domain.value if hasattr(config.domain, 'value') else str(config.domain)
+            self.rl.load_pretrained(domain_str)
+
+        # v3: PPO algorithm
+        self._rl_algorithm = kwargs.get("rl_algorithm", "thompson")
+        self._ppo_policy = None
+        if self._rl_algorithm == "ppo":
+            from adaptive_intelligence.rl.ppo import PPOPolicy
+            self._ppo_policy = PPOPolicy(n_actions=len(RetrievalRoute))
+
         logger.info(
             f"Engine initialized: llm={config.llm_backend.value}/{config.llm_model}, "
-            f"vectorless={self._vectorless}, domain={config.domain.value}"
+            f"vectorless={self._vectorless}, domain={config.domain.value}, "
+            f"rl={self._rl_algorithm}, reranking={self._reranking}"
         )
 
     def _build_config_from_kwargs(self, kwargs: Dict[str, Any]) -> AdaptiveConfig:
@@ -299,6 +333,22 @@ class AdaptiveAI:
 
         # Step 3: Execute Retrieval
         retrieved_chunks = self._execute_retrieval(query, analysis, policy_action)
+
+        # v3: Multi-query decomposition for complex queries
+        if self._decomposer and self._decomposer.should_decompose(query):
+            sub_queries = self._decomposer.decompose(query)
+            if len(sub_queries) > 1:
+                for sq in sub_queries:
+                    if sq != query:
+                        extra = self._execute_retrieval(sq, analysis, policy_action)
+                        for chunk in extra:
+                            if chunk not in retrieved_chunks:
+                                retrieved_chunks.append(chunk)
+
+        # v3: Reranking
+        if self._reranker and retrieved_chunks:
+            reranked = self._reranker.rerank(query, retrieved_chunks, top_k=policy_action.retrieval_depth)
+            retrieved_chunks = [chunk for chunk, score in reranked]
 
         # Step 4: Graph Traversal (conditional)
         graph_context = ""
@@ -706,6 +756,25 @@ class AdaptiveAI:
         except Exception:
             pass
 
+    # ─── v3: EXPORT / IMPORT / AB TEST ───────────────────
+
+    def export_policy(self, filepath: str):
+        """Export learned RL policy for transfer learning."""
+        self.rl.export_policy(filepath)
+
+    def import_policy(self, filepath: str):
+        """Import RL policy from another deployment."""
+        self.rl.import_policy(filepath)
+
+    def enable_ab_test(self, policy_a: str = "thompson", policy_b: str = "ppo"):
+        """Enable A/B testing between two policies."""
+        self.rl.enable_ab_test()
+        logger.info(f"A/B test: {policy_a} vs {policy_b}")
+
+    def ab_results(self) -> Dict[str, Any]:
+        """Get A/B test results."""
+        return self.rl.ab_results()
+
     # ─── DASHBOARD ─────────────────────────────────────────
 
     def dashboard(self) -> str:
@@ -748,7 +817,7 @@ class AdaptiveAI:
 
     def status(self) -> Dict[str, Any]:
         return {
-            "version": "2.0.1",
+            "version": "3.0.0",
             "vectorless": self._vectorless,
             "documents_indexed": self.page_index.count() if self._vectorless else (self.vector_index.count() if self.vector_index else 0),
             "total_queries": self._total_queries,

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "adaptive-intelligence"
-version = "2.0.1"
+version = "3.0.0"
 description = "Self-improving retrieval orchestration framework with RL-based routing, conditional graph activation, and evaluation-driven learning."
 readme = "README.md"
 license = {text = "Apache-2.0"}
@@ -43,6 +43,7 @@ docx = ["python-docx>=1.0.0"]
 xlsx = ["openpyxl>=3.1.0"]
 pptx = ["python-pptx>=0.6.21"]
 sql = ["sqlalchemy>=2.0.0"]
+rerank = ["sentence-transformers>=2.2.0"]
 ocr = ["pytesseract>=0.3.10", "Pillow>=10.0"]
 huggingface = ["transformers>=4.35.0", "torch>=2.0.0"]
 all = [
