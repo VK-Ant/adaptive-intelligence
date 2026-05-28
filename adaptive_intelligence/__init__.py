@@ -15,7 +15,7 @@ Usage:
     engine = AdaptiveAI(rl_algorithm="ppo", reranking=True, pretrained_policy=True)
 """
 
-__version__ = "3.0.0"
+__version__ = "3.0.1"
 __author__ = "Venkatkumar Rajan"
 
 from adaptive_intelligence.core.engine import AdaptiveAI

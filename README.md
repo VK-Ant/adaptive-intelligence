@@ -2,7 +2,7 @@
 
 Self-improving retrieval orchestration framework. Drop documents, ask questions, the system learns how to retrieve better over time.
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/VK-Ant/adaptive-intelligence/blob/main/notebooks/adaptive_intelligence_v3_demo.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/VK-Ant/adaptive-intelligence/blob/main/notebooks/adaptive_intelligence_v2_three_way.ipynb)
 
 ## Install
 

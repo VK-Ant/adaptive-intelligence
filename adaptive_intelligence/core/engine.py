@@ -74,7 +74,7 @@ class AdaptiveAI:
 
         # Setup
         setup_logging(config.log_level, config.log_file)
-        logger.info(f"Initializing Adaptive Intelligence v3.0.0")
+        logger.info(f"Initializing Adaptive Intelligence v3.0.1")
 
         self._storage_dir = Path(config.storage_dir)
         self._storage_dir.mkdir(parents=True, exist_ok=True)
@@ -224,8 +224,12 @@ class AdaptiveAI:
                 azure_endpoint=self.config.azure_endpoint,
                 deployment_name=self.config.deployment_name,
             )
+            # Quick availability check for Ollama
+            if self.config.llm_backend.value == "ollama" and not self._llm.is_available():
+                logger.info("Ollama not running. Using retrieval-only mode.")
+                self._llm = None
         except Exception as e:
-            logger.warning(f"LLM init failed: {e}. Fallback mode active.")
+            logger.info(f"LLM not available ({e}). Using retrieval-only mode.")
             self._llm = None
 
     # ─── INGESTION ─────────────────────────────────────────
@@ -675,20 +679,29 @@ class AdaptiveAI:
 
     def _fallback_answer(self, query: str, chunks: List[Chunk]) -> str:
         if not chunks:
-            return "I could not find relevant information to answer this query."
+            return "No relevant information found in the ingested documents for this query."
 
-        parts = ["Based on the available documents:\n"]
+        # Build a clean, readable answer from retrieved chunks
+        parts = []
         for i, chunk in enumerate(chunks[:5]):
-            source = chunk.source_document or "Unknown"
-            page = f", Page {chunk.page_number}" if chunk.page_number else ""
-            preview = chunk.content[:300].strip()
-            parts.append(f"[{i+1}] From {source}{page}:\n{preview}\n")
+            source = chunk.source_document or "document"
+            page = f" (page {chunk.page_number})" if chunk.page_number else ""
+            content = chunk.content.strip()
 
-        parts.append(
-            "\nNote: Direct excerpt from sources. "
-            "Connect an LLM provider for synthesized answers."
-        )
-        return "\n".join(parts)
+            # Clean up content - take meaningful portion
+            if len(content) > 400:
+                # Cut at sentence boundary
+                cut = content[:400]
+                last_period = cut.rfind(".")
+                if last_period > 100:
+                    content = cut[:last_period + 1]
+                else:
+                    content = cut + "..."
+
+            parts.append(f"From {source}{page}:\n{content}")
+
+        answer = "\n\n".join(parts)
+        return answer
 
     def _extract_citations(self, answer: str, chunks: List[Chunk]) -> List[Citation]:
         citations = []
@@ -817,7 +830,7 @@ class AdaptiveAI:
 
     def status(self) -> Dict[str, Any]:
         return {
-            "version": "3.0.0",
+            "version": "3.0.1",
             "vectorless": self._vectorless,
             "documents_indexed": self.page_index.count() if self._vectorless else (self.vector_index.count() if self.vector_index else 0),
             "total_queries": self._total_queries,

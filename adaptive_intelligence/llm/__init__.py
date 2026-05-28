@@ -285,11 +285,20 @@ class HuggingFaceProvider(BaseLLMProvider):
 
         start = time.time()
 
-        full_prompt = ""
-        if system_prompt:
-            full_prompt = f"System: {system_prompt}\n\nUser: {prompt}\n\nAssistant:"
-        else:
-            full_prompt = f"User: {prompt}\n\nAssistant:"
+        # Use chat template if available, else simple format
+        try:
+            messages = []
+            if system_prompt:
+                messages.append({"role": "system", "content": system_prompt})
+            messages.append({"role": "user", "content": prompt})
+            full_prompt = self._tokenizer.apply_chat_template(
+                messages, tokenize=False, add_generation_prompt=True
+            )
+        except Exception:
+            if system_prompt:
+                full_prompt = f"System: {system_prompt}\n\nUser: {prompt}\n\nAssistant:"
+            else:
+                full_prompt = f"User: {prompt}\n\nAssistant:"
 
         inputs = self._tokenizer(full_prompt, return_tensors="pt", truncation=True, max_length=4096)
         inputs = {k: v.to(self._model.device) for k, v in inputs.items()}
@@ -298,24 +307,77 @@ class HuggingFaceProvider(BaseLLMProvider):
         with torch.no_grad():
             outputs = self._model.generate(
                 **inputs,
-                max_new_tokens=max_tokens,
+                max_new_tokens=min(max_tokens, 1024),
                 temperature=max(temperature, 0.01),
                 do_sample=temperature > 0,
-                pad_token_id=self._tokenizer.pad_token_id,
+                pad_token_id=self._tokenizer.pad_token_id or self._tokenizer.eos_token_id,
+                repetition_penalty=1.3,
+                no_repeat_ngram_size=4,
             )
 
         generated = outputs[0][input_len:]
-        text = self._tokenizer.decode(generated, skip_special_tokens=True)
+        text = self._tokenizer.decode(generated, skip_special_tokens=True).strip()
+
+        # Clean garbled output
+        text = self._clean_output(text)
+
         latency = time.time() - start
 
         return LLMResponse(
-            text=text.strip(),
+            text=text,
             model=self.model_name,
             provider="huggingface",
             input_tokens=input_len,
             output_tokens=len(generated),
             latency_seconds=latency,
         )
+
+    @staticmethod
+    def _clean_output(text: str) -> str:
+        """Remove garbled/repetitive content from model output."""
+        if not text:
+            return text
+
+        lines = text.split("\n")
+        clean_lines = []
+        seen = set()
+
+        for line in lines:
+            stripped = line.strip()
+            # Skip empty or very short repeated lines
+            if not stripped:
+                if clean_lines and clean_lines[-1] != "":
+                    clean_lines.append("")
+                continue
+
+            # Skip if line is mostly non-alphabetic (garbled)
+            alpha_ratio = sum(c.isalpha() or c.isspace() for c in stripped) / max(len(stripped), 1)
+            if alpha_ratio < 0.5 and len(stripped) > 20:
+                break  # Stop at first garbled line
+
+            # Skip repeated lines
+            key = stripped.lower()[:80]
+            if key in seen and len(key) > 10:
+                continue
+            seen.add(key)
+
+            # Stop if line is just repeated characters
+            if len(set(stripped)) < 3 and len(stripped) > 5:
+                break
+
+            clean_lines.append(line)
+
+        result = "\n".join(clean_lines).strip()
+
+        # If result is too short after cleaning, return what we have
+        if len(result) < 10 and len(text) > 10:
+            # Take first 500 chars of original, cut at last sentence
+            result = text[:500]
+            last_period = result.rfind(".")
+            if last_period > 50:
+                result = result[:last_period + 1]
+
+        return result
 
 
 class LLMManager:
