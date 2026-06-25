@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/images/image_ai.png" alt="adaptive-intelligence" width="100%">
+<img src="https://raw.githubusercontent.com/VK-Ant/adaptive-intelligence/main/docs/images/image_ai.png" alt="adaptive-intelligence" width="100%">
 
 # adaptive-intelligence
 
@@ -213,40 +213,52 @@ python demo_mcp_client.py # Connect to MCP server (terminal 2)
 
 ## FAQ
 
-**Does it work without an LLM?**
+**1. Does it work without an LLM?**
+
 Yes. Set `llm_backend="none"` and the system returns relevant document excerpts. RL routing, graph activation, memory, and evaluation all work without an LLM.
 
-**Does it work without a vector database?**
+**2. Does it work without a vector database?**
+
 Yes. Set `vectorless=True` for page-level BM25 search with zero dependencies. Same RL routing, same graph, same learning.
 
-**How many queries before it starts learning?**
+**3. How many queries before it starts learning?**
+
 Default warmup is 15 queries. During warmup, the system uses smart heuristic defaults while collecting RL statistics. After 15 queries, the learned policy takes over. Use `pretrained_policy=True` to skip warmup entirely.
 
-**Which retrieval strategies does the RL choose from?**
+**4. Which retrieval strategies does the RL choose from?**
+
 Six routes: keyword only, vector only, hybrid (keyword + vector with RRF), table first, graph first, and graph hybrid. The RL also selects retrieval depth and whether to activate the knowledge graph.
 
-**How is the knowledge graph built?**
+**5. How is the knowledge graph built?**
+
 Automatically during document ingestion from entity co-occurrences. No manual setup. A 5-signal gate decides per-query whether to activate graph traversal.
 
-**What is context engineering?**
+**6. What is context engineering?**
+
 Instead of just stuffing retrieved chunks into a prompt, context engineering optimizes the entire context window — system prompt, memory entries, conversation history, tool results, and chunks — with token budget allocation per component.
 
-**How does agentic mode work?**
+**7. How does agentic mode work?**
+
 The system retrieves, evaluates confidence, and if it's below threshold, refines the query and retrieves again. It can also call registered tools between rounds. Maximum 3 rounds by default.
 
-**Can I add documents after initial ingestion?**
+**8. Can I add documents after initial ingestion?**
+
 Yes. Call `engine.ingest()` again with new documents. The RL policy, knowledge graph, and memory all continue from their current state. No restart needed.
 
-**What about latency?**
+**9. What about latency?**
+
 The system adds approximately 100-150ms overhead per query (classification, RL decision, evaluation, policy update). The LLM call typically takes 500-3000ms. Overhead is roughly 5-10% of total response time.
 
-**How does it save cost?**
+**10. How does it save cost?**
+
 The RL learns optimal retrieval depth per query type. Factual queries get depth 2 (2 chunks), complex queries get depth 8. Fewer chunks = fewer tokens = lower LLM cost. The RL also learns which tools to skip, reducing unnecessary API calls.
 
-**Is it production-ready?**
+**11. Is it production-ready?**
+
 The library has 99 tests, crash recovery with auto-checkpoint, and graceful shutdown. BM25 is in-memory which works for hundreds of documents. For 50K+ documents, a disk-backed index is planned.
 
-**How is this different from LangChain or LlamaIndex?**
+**12. How is this different from LangChain or LlamaIndex?**
+
 Those are orchestration frameworks with static pipelines. You configure the retrieval strategy once. adaptive-intelligence learns the optimal strategy per query type through reinforcement learning. The system improves with every query answered.
 
 ## Version History

@@ -4,9 +4,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "adaptive-intelligence"
-version = "4.0.1"
+version = "4.0.2"
 description = "Self-improving retrieval framework with RL routing, context engineering, MCP integration, agentic workflow, and persistent memory."
-readme = "README.md"
+readme = {file = "README.md", content-type = "text/markdown"}
 license = {text = "Apache-2.0"}
 requires-python = ">=3.9"
 authors = [
