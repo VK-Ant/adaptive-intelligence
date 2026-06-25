@@ -1,0 +1,27 @@
+{
+  "routing_patterns": {},
+  "graph_thresholds": {},
+  "route_performance": {
+    "structured_lookup:financial:table_first": {
+      "total": 1,
+      "success": 0,
+      "avg_score": 0.40842599999999996
+    },
+    "relational:operational:graph_hybrid": {
+      "total": 1,
+      "success": 0,
+      "avg_score": 0.2853320000000001
+    },
+    "comparative:financial:hybrid": {
+      "total": 1,
+      "success": 0,
+      "avg_score": 0.40744466666666673
+    },
+    "factual:general:keyword_only": {
+      "total": 2,
+      "success": 0,
+      "avg_score": 0.2940245
+    }
+  },
+  "model_performance": {}
+}

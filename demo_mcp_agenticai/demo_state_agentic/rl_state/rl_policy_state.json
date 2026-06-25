@@ -1,0 +1,267 @@
+{
+  "total_queries": 6,
+  "exploration_rate": 0.2,
+  "arms": {
+    "relational:multi_hop:operational:graph:page_graph:d10:g1": {
+      "alpha": 1.54483362464986,
+      "beta": 2.45516637535014,
+      "total_pulls": 2,
+      "total_reward": 0.5448336246498601,
+      "mean": 0.386208406162465
+    },
+    "factual:complex:healthcare:keyword_only:d8:g0": {
+      "alpha": 1.2443235294117647,
+      "beta": 1.7556764705882353,
+      "total_pulls": 1,
+      "total_reward": 0.24432352941176472,
+      "mean": 0.41477450980392155
+    },
+    "analytical:multi_hop:healthcare:page_bm25:d10:g0": {
+      "alpha": 1.5347775263157897,
+      "beta": 2.4652224736842103,
+      "total_pulls": 2,
+      "total_reward": 0.5347775263157895,
+      "mean": 0.3836943815789474
+    },
+    "reasoning:multi_hop:operational:graph:page_bm25:d10:g1": {
+      "alpha": 1.222249619047619,
+      "beta": 1.777750380952381,
+      "total_pulls": 1,
+      "total_reward": 0.22224961904761908,
+      "mean": 0.4074165396825397
+    }
+  },
+  "experiences": [
+    {
+      "query_id": "2ccb88ab4712",
+      "state": {
+        "query_type": "relational",
+        "complexity": "multi_hop",
+        "domain": "operational",
+        "entities": [
+          "Meridian",
+          "Analyze",
+          "Pacific Chip"
+        ],
+        "intent": "analyze_risk",
+        "has_relationship_indicators": true,
+        "has_temporal_markers": true,
+        "temporal_markers": [
+          "Q4"
+        ],
+        "confidence": 1.0,
+        "suggested_indexes": [
+          "graph",
+          "vector"
+        ],
+        "requires_graph": true,
+        "requires_table": false
+      },
+      "action": {
+        "retrieval_route": "page_graph",
+        "retrieval_depth": 10,
+        "graph_activation": true,
+        "graph_depth": 2,
+        "prompt_template": "analysis",
+        "verification_level": "citation",
+        "was_exploration": false,
+        "action_confidence": 0.5
+      },
+      "reward": 0.2492350952380953,
+      "timestamp": 1782389672.9708838
+    },
+    {
+      "query_id": "cbd679f7d62b",
+      "state": {
+        "query_type": "relational",
+        "complexity": "multi_hop",
+        "domain": "operational",
+        "entities": [
+          "Meridian",
+          "Analyze",
+          "Pacific Chip"
+        ],
+        "intent": "analyze_risk",
+        "has_relationship_indicators": true,
+        "has_temporal_markers": true,
+        "temporal_markers": [
+          "Q4"
+        ],
+        "confidence": 1.0,
+        "suggested_indexes": [
+          "graph",
+          "vector"
+        ],
+        "requires_graph": true,
+        "requires_table": false
+      },
+      "action": {
+        "retrieval_route": "page_graph",
+        "retrieval_depth": 10,
+        "graph_activation": true,
+        "graph_depth": 2,
+        "prompt_template": "analysis",
+        "verification_level": "citation",
+        "was_exploration": false,
+        "action_confidence": 0.5
+      },
+      "reward": 0.2955985294117648,
+      "timestamp": 1782390144.6497493
+    },
+    {
+      "query_id": "b9e13b59e9f5",
+      "state": {
+        "query_type": "factual",
+        "complexity": "complex",
+        "domain": "healthcare",
+        "entities": [
+          "Type",
+          "Metformin",
+          "40",
+          "Diabetes",
+          "Is Empagliflozin",
+          "2",
+          "Check"
+        ],
+        "intent": "verify",
+        "has_relationship_indicators": false,
+        "has_temporal_markers": false,
+        "temporal_markers": [],
+        "confidence": 0.8,
+        "suggested_indexes": [
+          "keyword",
+          "vector"
+        ],
+        "requires_graph": false,
+        "requires_table": false
+      },
+      "action": {
+        "retrieval_route": "keyword_only",
+        "retrieval_depth": 8,
+        "graph_activation": false,
+        "graph_depth": 0,
+        "prompt_template": "extraction",
+        "verification_level": "citation",
+        "was_exploration": false,
+        "action_confidence": 0.5
+      },
+      "reward": 0.24432352941176472,
+      "timestamp": 1782390224.6606295
+    },
+    {
+      "query_id": "aaa64b501ce4",
+      "state": {
+        "query_type": "analytical",
+        "complexity": "multi_hop",
+        "domain": "healthcare",
+        "entities": [
+          "Type",
+          "Metformin",
+          "40",
+          "Diabetes",
+          "Is Empagliflozin",
+          "2",
+          "Check"
+        ],
+        "intent": "analyze_risk",
+        "has_relationship_indicators": false,
+        "has_temporal_markers": false,
+        "temporal_markers": [],
+        "confidence": 0.8,
+        "suggested_indexes": [
+          "vector",
+          "keyword"
+        ],
+        "requires_graph": false,
+        "requires_table": false
+      },
+      "action": {
+        "retrieval_route": "page_bm25",
+        "retrieval_depth": 10,
+        "graph_activation": false,
+        "graph_depth": 0,
+        "prompt_template": "analysis",
+        "verification_level": "citation",
+        "was_exploration": false,
+        "action_confidence": 0.5
+      },
+      "reward": 0.2749232631578947,
+      "timestamp": 1782390489.020367
+    },
+    {
+      "query_id": "14c0cc1eb87e",
+      "state": {
+        "query_type": "analytical",
+        "complexity": "multi_hop",
+        "domain": "healthcare",
+        "entities": [
+          "Type",
+          "Metformin",
+          "40",
+          "Diabetes",
+          "Is Empagliflozin",
+          "2",
+          "Check"
+        ],
+        "intent": "analyze_risk",
+        "has_relationship_indicators": false,
+        "has_temporal_markers": false,
+        "temporal_markers": [],
+        "confidence": 0.8,
+        "suggested_indexes": [
+          "vector",
+          "keyword"
+        ],
+        "requires_graph": false,
+        "requires_table": false
+      },
+      "action": {
+        "retrieval_route": "page_bm25",
+        "retrieval_depth": 10,
+        "graph_activation": false,
+        "graph_depth": 0,
+        "prompt_template": "analysis",
+        "verification_level": "citation",
+        "was_exploration": false,
+        "action_confidence": 0.5
+      },
+      "reward": 0.2598542631578947,
+      "timestamp": 1782391080.9567306
+    },
+    {
+      "query_id": "763b5cc7af26",
+      "state": {
+        "query_type": "reasoning",
+        "complexity": "multi_hop",
+        "domain": "operational",
+        "entities": [
+          "Meridian",
+          "Pacific Chip"
+        ],
+        "intent": "analyze_risk",
+        "has_relationship_indicators": true,
+        "has_temporal_markers": false,
+        "temporal_markers": [],
+        "confidence": 0.9,
+        "suggested_indexes": [
+          "vector",
+          "keyword"
+        ],
+        "requires_graph": true,
+        "requires_table": false
+      },
+      "action": {
+        "retrieval_route": "page_bm25",
+        "retrieval_depth": 10,
+        "graph_activation": true,
+        "graph_depth": 2,
+        "prompt_template": "extraction",
+        "verification_level": "citation",
+        "was_exploration": false,
+        "action_confidence": 0.5
+      },
+      "reward": 0.22224961904761908,
+      "timestamp": 1782391545.2601235
+    }
+  ]
+}
