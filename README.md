@@ -1,21 +1,22 @@
 # adaptive-intelligence
 
-Self-improving retrieval orchestration framework. Drop documents, ask questions, the system learns how to retrieve better over time.
+Self-improving retrieval framework that learns, remembers, and connects tools.
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/VK-Ant/adaptive-intelligence/blob/main/notebooks/adaptive_intelligence_v2_three_way.ipynb)
+## What it does
+
+Instead of using the same retrieval strategy for every query, adaptive-intelligence uses reinforcement learning to select the best strategy per query type. The system evaluates every response, uses the score as a reward signal, and improves with every query answered.
 
 ## Install
 
-```
-pip install adaptive-intelligence
-pip install adaptive-intelligence[pdf]
-pip install adaptive-intelligence[sql]
-pip install adaptive-intelligence[all]
+```bash
+pip install adaptive-intelligence                # Zero deps (Ollama, no-LLM mode)
+pip install adaptive-intelligence[vector]         # + ChromaDB vector search
+pip install adaptive-intelligence[openai]         # + Any OpenAI-compatible API (10+ providers)
+pip install adaptive-intelligence[huggingface]    # + Local HuggingFace models
+pip install adaptive-intelligence[all]            # Everything
 ```
 
----
-
-## Quick Start
+## Quick start
 
 ```python
 from adaptive_intelligence import AdaptiveAI
@@ -24,236 +25,215 @@ engine = AdaptiveAI()
 engine.ingest("./documents")
 response = engine.ask("What are the key risks?")
 print(response.answer)
-print(f"Confidence: {response.confidence:.0%}")
 ```
 
----
+Works without any LLM — returns relevant document excerpts. Add an LLM for synthesized answers.
 
-## Comparison
+## LLM providers
 
-| S.No. | Capability | Traditional RAG | GraphRAG | Adaptive Intelligence |
-|-------|-----------|----------------|----------|----------------------|
-| 1 | Retrieval | Static vector | Always graph | RL-learned per query |
-| 2 | Graph | None | Always on | Conditional (5-signal gate) |
-| 3 | Learning | None | None | Improves every query |
-| 4 | Evaluation | None | None | 6 metrics per response |
-| 5 | Vector DB | Required | Required | Optional (vectorless mode) |
-| 6 | Output | Text only | Text only | JSON, CSV, YAML, DataFrame |
-| 7 | Feedback | None | None | Thumbs up/down updates RL |
-| 8 | Reranking | None | None | Cross-encoder re-scoring |
-| 9 | Complex queries | Single retrieval | Single retrieval | Multi-query decomposition |
-| 10 | Domain warmup | Manual tuning | Manual tuning | Pre-trained policies (skip warmup) |
-| 11 | LLM agnostic | Usually one | Usually one | 10+ providers |
-| 12 | Crash recovery | None | Partial | Full auto-checkpoint |
+The library works with any LLM. The `[openai]` extras installs the OpenAI SDK which connects to any OpenAI-compatible API.
 
-## Results (20 queries, same LLM, same corpus)
-
-| S.No. | Query type | Traditional RAG | Adaptive Intelligence | Delta |
-|-------|-----------|----------------|----------------------|-------|
-| 1 | Factual | 85% | 90% | +5% |
-| 2 | Relational | 45% | 78% | +33% |
-| 3 | Analytical | 55% | 75% | +20% |
-| 4 | Comparative | 50% | 80% | +30% |
-| 5 | Multi-hop | 35% | 72% | +37% |
-| 6 | **Overall** | **54%** | **79%** | **+25%** |
-
----
-
-## Version Evolution
-
-| S.No. | Feature | v1 | v2 | v3 (current) |
-|-------|---------|----|----|------|
-| 1 | RL algorithm | Thompson Sampling | + configurable warmup | + PPO option |
-| 2 | Graph | 5-signal gate + BFS | + persistence | + pre-trained policies |
-| 3 | Evaluation | 6 metrics | + user feedback | + A/B testing |
-| 4 | Ingestion | Basic | Hardened (every edge case) | Same |
-| 5 | SQL connector | No | PostgreSQL, MySQL, SQLite | Same |
-| 6 | Vectorless mode | No | Page BM25 + graph + RL | Same |
-| 7 | Output formats | Text only | JSON, CSV, YAML, DataFrame | Same |
-| 8 | Reranking | No | No | Cross-encoder re-scoring |
-| 9 | Multi-query | No | No | Auto-decompose complex queries |
-| 10 | Pre-trained policies | No | No | Financial, legal, healthcare |
-| 11 | Transfer learning | No | No | Export/import policies |
-| 12 | A/B testing | No | No | Compare two policies |
-| 13 | Crash recovery | Partial | Full auto-checkpoint | Same |
-| 14 | Providers | 3 | 10+ | Same |
-| 15 | System prompt | No | Custom | Same |
-
----
-
-## All Features
-
-### RL + Retrieval
+### Free (no credit card needed)
 
 ```python
-# Default: Thompson Sampling
+# Ollama — local, no extras needed
 engine = AdaptiveAI()
 
-# PPO algorithm
-engine = AdaptiveAI(rl_algorithm="ppo")
-
-# Cross-encoder reranking
-engine = AdaptiveAI(reranking=True)
-
-# Pre-trained policy (skip warmup)
-engine = AdaptiveAI(domain="financial", pretrained_policy=True)
-
-# Transfer learning
-engine.export_policy("my_policy.json")
-other_engine.import_policy("my_policy.json")
-
-# A/B testing
-engine.enable_ab_test(policy_a="thompson", policy_b="ppo")
-print(engine.ab_results())
-```
-
-### Vectorless Mode
-
-```python
-engine = AdaptiveAI(vectorless=True)
-# No ChromaDB. No embeddings. Pure BM25 + graph + RL.
-# Page-number citations. Zero dependencies.
-```
-
-### Output Formats
-
-```python
-response = engine.ask("Extract vendors", output_format="json")
-response = engine.ask("List items", output_format="csv")
-response = engine.ask("Show data", output_format="dataframe")
-response = engine.ask("Details", output_format="json",
-    schema={"vendor": "str", "amount": "float"})
-```
-
-### User Feedback
-
-```python
-engine.feedback(response.query_id, "good")
-engine.feedback(response.query_id, "bad", reason="Missing data")
-```
-
-### SQL Connector
-
-```python
-engine.ingest("sqlite:///data.db")
-engine.ingest("postgresql://user:pass@host/db", tables=["orders"])
-```
-
-### Incremental Ingestion
-
-```python
-engine.ingest("./new_file.pdf")
-engine.remove("old_file.pdf")
-engine.update("./changed_file.pdf")
-engine.ingest("./docs/", parallel=True, workers=4)
-```
-
-### System Prompt
-
-```python
-engine = AdaptiveAI(system_prompt="You are a financial analyst.")
-response = engine.ask("Risks?", system_prompt="Rate each HIGH/MEDIUM/LOW.")
-engine.set_system_prompt("You are a legal reviewer.")
-```
-
----
-
-## Providers — Copy, Paste, Run
-
-### Free
-
-```python
-engine = AdaptiveAI()  # Ollama (default, local)
-engine = AdaptiveAI(llm_model="llama3.2")  # Ollama specific model
-
-engine = AdaptiveAI(api_key="nvapi-...",
+# NVIDIA NIM — free cloud tier
+engine = AdaptiveAI(
+    api_key="nvapi-...",
     base_url="https://integrate.api.nvidia.com/v1",
-    llm_model="meta/llama-3.1-70b-instruct")  # NVIDIA NIM
+    llm_model="meta/llama-3.1-70b-instruct"
+)
 
-engine = AdaptiveAI(api_key="gsk_...",
+# Groq — free cloud tier
+engine = AdaptiveAI(
+    api_key="gsk_...",
     base_url="https://api.groq.com/openai/v1",
-    llm_model="llama-3.3-70b-versatile")  # Groq
+    llm_model="llama-3.3-70b-versatile"
+)
 
-engine = AdaptiveAI(llm_backend="huggingface",
-    llm_model="Qwen/Qwen2.5-1.5B-Instruct")  # HuggingFace local
+# Google Gemini — free tier
+engine = AdaptiveAI(
+    api_key="...",
+    base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+    llm_model="gemini-2.0-flash"
+)
+
+# Together AI — free tier
+engine = AdaptiveAI(
+    api_key="...",
+    base_url="https://api.together.xyz/v1",
+    llm_model="meta-llama/Llama-3-70b-chat-hf"
+)
+
+# Fireworks AI — free tier
+engine = AdaptiveAI(
+    api_key="...",
+    base_url="https://api.fireworks.ai/inference/v1",
+    llm_model="accounts/fireworks/models/llama-v3p1-70b-instruct"
+)
+
+# HuggingFace local — runs on your GPU, needs [huggingface] extras
+engine = AdaptiveAI(
+    llm_backend="huggingface",
+    llm_model="Qwen/Qwen2.5-1.5B-Instruct"
+)
+
+# No LLM — retrieval only, zero dependencies
+engine = AdaptiveAI(llm_backend="none")
 ```
 
 ### Paid
 
 ```python
-engine = AdaptiveAI(api_key="sk-...", llm_model="gpt-4o")  # OpenAI
-engine = AdaptiveAI(api_key="xai-...",
-    base_url="https://api.x.ai/v1", llm_model="grok-3-mini")  # Grok
+# OpenAI
+engine = AdaptiveAI(api_key="sk-...", llm_model="gpt-4o")
+
+# Grok (xAI)
+engine = AdaptiveAI(api_key="xai-...", base_url="https://api.x.ai/v1")
+
+# Azure OpenAI
+engine = AdaptiveAI(azure_endpoint="https://your.openai.azure.com/", api_key="...")
 ```
 
-### No LLM
+### Self-hosted
 
 ```python
-engine = AdaptiveAI(llm_backend="none")  # Retrieval only
-engine = AdaptiveAI(llm_backend="none", vectorless=True)  # Zero dependencies
+# vLLM local server (free, runs on your GPU)
+engine = AdaptiveAI(base_url="http://localhost:8000/v1")
+
+# Any OpenAI-compatible server
+engine = AdaptiveAI(base_url="http://your-server:8000/v1")
 ```
 
----
+Any server that speaks the OpenAI-compatible API works with `[openai]` extras.
 
-## Supported Formats
+## Key features
 
-| S.No. | Format | Extension |
-|-------|--------|-----------|
-| 1 | Text / Markdown | .txt, .md |
-| 2 | CSV / TSV | .csv, .tsv |
-| 3 | JSON | .json |
-| 4 | HTML / XML | .html, .xml |
-| 5 | PDF | .pdf |
-| 6 | Word | .docx |
-| 7 | Excel | .xlsx |
-| 8 | PowerPoint | .pptx |
-| 9 | Images (OCR) | .png, .jpg |
-| 10 | SQL databases | PostgreSQL, MySQL, SQLite |
+### Context Engineering
+Optimizes the entire context window — not just which chunks to retrieve, but what memory to include, how much history to keep, which tool results to add, and how to structure the prompt.
 
----
-
-## FAQ
-
-**Q: How is this different from ChatGPT / Claude?**
-This is not an LLM. It's the retrieval layer that decides what context to feed TO the LLM. Works with any LLM as backend.
-
-**Q: What is vectorless mode?**
-No ChromaDB, no embeddings, no vector DB. Pure BM25 keyword search + graph + RL. Best for documents with standardized terminology or air-gapped environments.
-
-**Q: Does the RL policy persist?**
-Yes. Everything persists to disk with auto-checkpoint every 5 minutes.
-
-**Q: Can I use it without an LLM?**
-Yes. `AdaptiveAI(llm_backend="none")` returns ranked source excerpts directly.
-
----
-
-## Also by the Author
-
-- **[llmevalkit](https://pypi.org/project/llmevalkit/)** — 61 metrics for LLM evaluation
-- **[Responsible AI Series](https://medium.com/@VK_Venkatkumar)** — HIPAA, GDPR, NIST AI RMF, CoSAI
-
-## Citation
-
-```bibtex
-@article{venkatkumar2026adaptive,
-  title={Adaptive Retrieval Orchestration for Self-Learning Knowledge Systems},
-  author={Venkatkumar, Rajan},
-  year={2026},
-  url={https://www.researchgate.net/publication/405076088}
-}
+```python
+engine = AdaptiveAI(context_engineering=True)
 ```
+
+### MCP Integration
+Connect external tools. Register MCP servers, REST APIs, or Python functions. The RL policy learns which tools to call per query type.
+
+```python
+# Register tools
+engine.add_tool("financial", server="http://localhost:8081")
+engine.add_tool("calculator", function=my_calc_function)
+engine.add_tool("search", api_endpoint="https://api.example.com/search")
+
+# List registered tools
+engine.list_tools()
+
+# Remove a tool
+engine.remove_tool("search")
+
+# Serve your retrieval as an MCP server
+engine.serve_mcp(port=8080)
+```
+
+### Agentic Workflow
+Multi-round retrieval. The system retrieves, evaluates confidence, refines the query, calls tools, and retrieves again until the answer is sufficient.
+
+```python
+response = engine.ask("Analyze supply chain risks and mitigation", mode="agentic")
+```
+
+### Persistent Memory
+Remembers across sessions. Routing patterns, user preferences, and facts persist to disk.
+
+```python
+engine.remember("focus_area", "supply chain risk")
+engine.recall("focus_area")
+engine.search_memory("supply chain")
+```
+
+### Incremental Learning
+Add new documents anytime. The RL policy, knowledge graph, and memory continue from their current state — no restart needed.
+
+```python
+engine.ingest("./initial_docs")           # Learn from initial set
+engine.ingest("./quarterly_update.pdf")   # Add later, system continues
+```
+
+### RL-Based Retrieval Routing
+Thompson Sampling or PPO learns which retrieval strategy works best per query type.
+
+```python
+engine = AdaptiveAI(rl_algorithm="ppo")
+engine = AdaptiveAI(pretrained_policy=True, domain="financial")
+engine.export_policy("learned.json")      # Transfer to another deployment
+engine.import_policy("learned.json")
+```
+
+### Conditional Graph Activation
+Knowledge graph auto-built during ingestion. A 5-signal gate activates graph traversal only when the query needs relational reasoning. Saves compute on 70% of queries.
+
+### Vectorless Mode
+No ChromaDB, no embeddings, zero dependencies. Uses page-level BM25 with page citations.
+
+```python
+engine = AdaptiveAI(vectorless=True)
+```
+
+### Structured Output
+
+```python
+response = engine.ask("Extract metrics", output_format="json")
+response = engine.ask("List items", output_format="csv")
+response = engine.ask("Summarize", output_format="yaml")
+```
+
+### User Feedback
+
+```python
+response = engine.ask("What are the risks?")
+engine.feedback(response.query_id, "good")   # +0.2 RL reward
+engine.feedback(response.query_id, "bad")    # -0.3 RL reward + prompt evolution
+```
+
+## Demos
+
+### Colab notebook (no setup needed)
+Run on free T4 GPU with no API key: `notebooks/adaptive_intelligence_v4_demo.ipynb`
+
+### Local demos
+
+```bash
+cd demo_mcp_agenticai
+pip install -r requirements.txt
+python demo_basic.py      # Basic usage + incremental learning
+python demo_tools.py      # Tool registry + cost optimization
+python demo_agentic.py    # Agentic multi-round retrieval
+python demo_mcp_server.py # Serve as MCP server (terminal 1)
+python demo_mcp_client.py # Connect to MCP server (terminal 2)
+```
+
+## How it works
+
+1. **Understand** — Trigger interpreter classifies query type, complexity, domain, entities (no LLM call)
+2. **Decide** — RL policy selects retrieval route, depth, graph activation, tools to call
+3. **Retrieve** — Executes via vector, BM25, or page index with RRF fusion. Graph activates conditionally.
+4. **Generate** — Cross-encoder reranks chunks. Context engineer assembles full context window. LLM generates.
+5. **Learn** — 6 metrics evaluate response. Composite score = RL reward. Policy updates. Next query is better.
+
+## Links
+
+- **PyPI:** https://pypi.org/project/adaptive-intelligence/
+- **GitHub:** https://github.com/VK-Ant/adaptive-intelligence
+- **Paper:** https://www.researchgate.net/publication/405076088
+- **Portfolio:** https://vk-ant.github.io/Venkatkumar
+- **Also:** [llmevalkit](https://pypi.org/project/llmevalkit/) — 61 metrics for LLM evaluation
+
+## Author
+
+Venkatkumar Rajan | [@VK_Venkatkumar](https://linkedin.com/in/venkatkumarvk)
 
 ## License
 
 Apache License 2.0
-
-## Author
-
-Venkatkumar Rajan
-
-- LinkedIn: https://linkedin.com/in/venkatkumarvk
-- GitHub: https://github.com/VK-Ant
-- Portfolio: https://vk-ant.github.io/Venkatkumar/
-- PyPI: https://pypi.org/project/adaptive-intelligence/
-- ResearchGate: https://www.researchgate.net/publication/405076088

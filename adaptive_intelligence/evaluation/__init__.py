@@ -322,37 +322,70 @@ class EvaluationEngine:
             return None
 
         context_preview = "\n---\n".join(c.content[:300] for c in chunks[:5])
-        prompt = f"""Evaluate the quality of this answer. Return JSON only.
+        prompt = f"""Evaluate this answer. Return ONLY a JSON object, nothing else.
 
 Query: {query}
 
-Context (retrieved sources):
+Context:
 {context_preview}
 
 Answer: {answer}
 
-Score each 0.0-1.0:
-{{"faithfulness": <grounded in context?>, "relevance": <addresses query?>, "hallucination_risk": <fabricated content? higher=worse>}}"""
+Return ONLY this JSON (no explanation, no markdown):
+{{"faithfulness": 0.0, "relevance": 0.0, "hallucination_risk": 0.0}}
+
+Score each 0.0 to 1.0. faithfulness=grounded in context, relevance=addresses query, hallucination_risk=fabricated content (higher=worse)."""
 
         try:
-            response = self._llm.generate(prompt, temperature=0.0, max_tokens=200)
+            response = self._llm.generate(prompt, temperature=0.0, max_tokens=100)
             import json
-            # Extract JSON from response
+            import re
+
             text = response.text.strip()
-            # Handle markdown code blocks
+
+            # Strip markdown code blocks
             if "```" in text:
-                text = text.split("```")[1]
-                if text.startswith("json"):
-                    text = text[4:]
-                text = text.strip()
-            scores = json.loads(text)
+                parts = text.split("```")
+                for part in parts:
+                    part = part.strip()
+                    if part.startswith("json"):
+                        part = part[4:].strip()
+                    if part.startswith("{"):
+                        text = part
+                        break
+
+            # Try direct JSON parse
+            try:
+                scores = json.loads(text)
+            except json.JSONDecodeError:
+                # Extract JSON object with regex
+                match = re.search(r'\{[^}]*"faithfulness"[^}]*\}', text)
+                if match:
+                    # Clean common issues: trailing commas, unquoted values
+                    json_str = match.group()
+                    json_str = re.sub(r',\s*}', '}', json_str)  # trailing comma
+                    scores = json.loads(json_str)
+                else:
+                    # Try to extract any numbers from text
+                    faith = re.search(r'faithfulness["\s:]+([0-9.]+)', text)
+                    relev = re.search(r'relevance["\s:]+([0-9.]+)', text)
+                    halluc = re.search(r'hallucination["\s:_risk]+([0-9.]+)', text)
+                    if faith or relev:
+                        scores = {
+                            "faithfulness": float(faith.group(1)) if faith else 0.5,
+                            "relevance": float(relev.group(1)) if relev else 0.5,
+                            "hallucination_risk": float(halluc.group(1)) if halluc else 0.3,
+                        }
+                    else:
+                        return None
+
             return {
-                "faithfulness": float(scores.get("faithfulness", 0.5)),
-                "relevance": float(scores.get("relevance", 0.5)),
-                "hallucination_risk": float(scores.get("hallucination_risk", 0.5)),
+                "faithfulness": min(1.0, max(0.0, float(scores.get("faithfulness", 0.5)))),
+                "relevance": min(1.0, max(0.0, float(scores.get("relevance", 0.5)))),
+                "hallucination_risk": min(1.0, max(0.0, float(scores.get("hallucination_risk", 0.5)))),
             }
         except Exception as e:
-            logger.warning(f"LLM judge evaluation failed: {e}")
+            logger.debug(f"LLM judge skipped: {e}")
             return None
 
     def get_history(self) -> List[Dict[str, Any]]:

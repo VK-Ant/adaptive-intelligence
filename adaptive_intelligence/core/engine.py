@@ -1,21 +1,24 @@
-"""AdaptiveAI — The Main Orchestrator (v3).
+"""AdaptiveAI — The Main Orchestrator (v4).
 
-v3 additions: PPO algorithm, cross-encoder reranking, multi-query
-decomposition, pre-trained domain policies, transfer learning, A/B testing.
+v4 additions: context engineering, MCP integration, agentic workflow,
+persistent memory, incremental learning, tool registry.
 
 Usage:
     engine = AdaptiveAI()
     engine.ingest("./documents")
     response = engine.ask("What are the key risks?")
 
-    # v3: PPO
-    engine = AdaptiveAI(rl_algorithm="ppo")
+    # v4: Add docs later, system continues learning
+    engine.ingest("./new_report.pdf")
 
-    # v3: reranking
-    engine = AdaptiveAI(reranking=True)
+    # v4: Connect tools
+    engine.add_tool("financial", server="http://localhost:8081")
 
-    # v3: pretrained policy
-    engine = AdaptiveAI(domain="financial", pretrained_policy=True)
+    # v4: Agentic mode
+    response = engine.ask("Deep research on risks", mode="agentic")
+
+    # v4: MCP server
+    engine.serve_mcp(port=8080)
 """
 
 import json
@@ -23,7 +26,7 @@ import logging
 import time
 import signal
 import atexit
-from typing import Optional, Dict, Any, List, Union
+from typing import Optional, Dict, Any, List, Union, Callable
 from pathlib import Path
 
 from adaptive_intelligence.core.config import AdaptiveConfig, LLMBackend
@@ -74,7 +77,7 @@ class AdaptiveAI:
 
         # Setup
         setup_logging(config.log_level, config.log_file)
-        logger.info(f"Initializing Adaptive Intelligence v3.0.1")
+        logger.info(f"Initializing Adaptive Intelligence v4.0.0")
 
         self._storage_dir = Path(config.storage_dir)
         self._storage_dir.mkdir(parents=True, exist_ok=True)
@@ -179,10 +182,40 @@ class AdaptiveAI:
             from adaptive_intelligence.rl.ppo import PPOPolicy
             self._ppo_policy = PPOPolicy(n_actions=len(RetrievalRoute))
 
+        # v4: Persistent memory
+        self._memory_enabled = kwargs.get("memory", True)
+        self._persistent_memory = None
+        if self._memory_enabled:
+            from adaptive_intelligence.memory.persistent import PersistentMemory
+            self._persistent_memory = PersistentMemory(
+                storage_dir=str(self._storage_dir)
+            )
+
+        # v4: Context engineering
+        self._context_engineering = kwargs.get("context_engineering", True)
+        self._context_engineer = None
+        if self._context_engineering:
+            from adaptive_intelligence.context import ContextEngineer
+            self._context_engineer = ContextEngineer(
+                token_budget=kwargs.get("token_budget", 4096)
+            )
+
+        # v4: Tool registry
+        from adaptive_intelligence.mcp import ToolRegistry
+        self._tool_registry = ToolRegistry()
+
+        # v4: Agentic workflow
+        from adaptive_intelligence.agentic import AgenticWorkflow
+        self._agentic = AgenticWorkflow(
+            max_rounds=kwargs.get("agentic_rounds", 3),
+            confidence_threshold=kwargs.get("agentic_threshold", 0.7),
+        )
+
         logger.info(
             f"Engine initialized: llm={config.llm_backend.value}/{config.llm_model}, "
             f"vectorless={self._vectorless}, domain={config.domain.value}, "
-            f"rl={self._rl_algorithm}, reranking={self._reranking}"
+            f"rl={self._rl_algorithm}, reranking={self._reranking}, "
+            f"memory={self._memory_enabled}, context_engineering={self._context_engineering}"
         )
 
     def _build_config_from_kwargs(self, kwargs: Dict[str, Any]) -> AdaptiveConfig:
@@ -306,7 +339,8 @@ class AdaptiveAI:
             depth: Optional[int] = None,
             system_prompt: Optional[str] = None,
             output_format: Optional[str] = None,
-            schema: Optional[Dict] = None) -> AdaptiveResponse:
+            schema: Optional[Dict] = None,
+            mode: Optional[str] = None) -> AdaptiveResponse:
         """Ask a question over ingested documents.
 
         Args:
@@ -316,7 +350,23 @@ class AdaptiveAI:
             system_prompt: Override system prompt for this query.
             output_format: "json", "csv", "yaml", "dataframe", or None.
             schema: Custom output schema (for json format).
+            mode: "agentic" for multi-round retrieval, None for standard.
         """
+        # v4: Agentic mode
+        if mode == "agentic":
+            agent_result = self._agentic.run(
+                query, self, tool_registry=self._tool_registry
+            )
+            # Wrap in AdaptiveResponse
+            response = AdaptiveResponse(
+                answer=agent_result.answer,
+                confidence=0.0,
+                query_id=generate_query_id(),
+            )
+            response.agent_steps = agent_result.steps
+            response.agent_rounds = agent_result.total_rounds
+            response.tools_called = agent_result.tools_called
+            return response
         start_time = time.time()
         query_id = generate_query_id()
         self._total_queries += 1
@@ -369,12 +419,44 @@ class AdaptiveAI:
                     if chunk.chunk_id == chunk_id and chunk not in retrieved_chunks:
                         retrieved_chunks.append(chunk)
 
-        # Step 5: Build Prompt
-        prompt = self.prompts.build_prompt(
-            query=query, query_analysis=analysis,
-            chunks=retrieved_chunks, graph_context=graph_context,
-            template_override=policy_action.prompt_template,
-        )
+        # Step 5: Build Prompt (v4: context engineering)
+        if self._context_engineer:
+            # Search memory for relevant context
+            memory_entries = []
+            if self._persistent_memory:
+                memory_entries = self._persistent_memory.search(query, top_k=3)
+
+            # Get session history
+            session_history = []
+            if self._persistent_memory:
+                session_history = self._persistent_memory.get_session_context(last_n=3)
+
+            # Call tools if any match
+            tool_results = []
+            if self._tool_registry._tools:
+                suggested = self._tool_registry.select_tools(query)
+                for tool_name in suggested[:2]:
+                    tr = self._tool_registry.call_tool(tool_name, query)
+                    if tr.success:
+                        tool_results.append({"tool": tr.tool_name, "result": tr.result})
+
+            # Build optimized context window
+            domain_str = config.domain.value if hasattr(config.domain, 'value') else str(config.domain)
+            ctx = self._context_engineer.build_context(
+                query=query, chunks=retrieved_chunks,
+                memory_entries=memory_entries,
+                session_history=session_history,
+                tool_results=tool_results,
+                domain=domain_str,
+                custom_system_prompt=system_prompt or self._system_prompt,
+            )
+            prompt = ctx.assemble()
+        else:
+            prompt = self.prompts.build_prompt(
+                query=query, query_analysis=analysis,
+                chunks=retrieved_chunks, graph_context=graph_context,
+                template_override=policy_action.prompt_template,
+            )
 
         # v2: Add output format instructions to prompt
         if output_format:
@@ -493,10 +575,79 @@ class AdaptiveAI:
         if structured is not None:
             response.structured = structured
 
+        # v4: Update persistent memory
+        if self._persistent_memory:
+            self._persistent_memory.add_session_context(
+                query=query, answer=answer_text,
+                strategy=policy_action.retrieval_route.value,
+            )
+            self._persistent_memory.learn_pattern(
+                query_type=analysis.query_type.value,
+                domain=analysis.domain,
+                strategy=policy_action.retrieval_route.value,
+                score=eval_result.composite_score,
+            )
+
         # Auto-checkpoint
         self._maybe_checkpoint()
 
         return response
+
+    # ─── v4: TOOLS ─────────────────────────────────────────
+
+    def add_tool(self, name: str, description: str = "",
+                 server: str = None, function: Callable = None,
+                 api_endpoint: str = None, api_key: str = None):
+        """Register an external tool (MCP server, function, or API).
+
+        Args:
+            name: Tool identifier (e.g., "financial", "medical")
+            description: What the tool does
+            server: MCP server URL
+            function: Python callable
+            api_endpoint: REST API URL
+            api_key: API authentication
+        """
+        self._tool_registry.add_tool(
+            name=name, description=description,
+            server=server, function=function,
+            api_endpoint=api_endpoint, api_key=api_key,
+        )
+
+    def remove_tool(self, name: str):
+        """Remove a registered tool."""
+        self._tool_registry.remove_tool(name)
+
+    def list_tools(self) -> List[Dict[str, Any]]:
+        """List all registered tools."""
+        return self._tool_registry.list_tools()
+
+    # ─── v4: MCP SERVER ────────────────────────────────────
+
+    def serve_mcp(self, port: int = 8080):
+        """Start MCP server — any MCP client can use your retrieval."""
+        from adaptive_intelligence.mcp import MCPServer
+        server = MCPServer(self)
+        server.serve(port=port)
+
+    # ─── v4: MEMORY ────────────────────────────────────────
+
+    def remember(self, key: str, value: Any, category: str = "fact"):
+        """Store a fact in long-term memory."""
+        if self._persistent_memory:
+            self._persistent_memory.remember(key, value, category)
+
+    def recall(self, key: str) -> Optional[Any]:
+        """Recall a fact from long-term memory."""
+        if self._persistent_memory:
+            return self._persistent_memory.recall(key)
+        return None
+
+    def search_memory(self, query: str, top_k: int = 5) -> List[Any]:
+        """Search long-term memory."""
+        if self._persistent_memory:
+            return self._persistent_memory.search(query, top_k=top_k)
+        return []
 
     # ─── v2: FEEDBACK ──────────────────────────────────────
 
@@ -751,6 +902,8 @@ class AdaptiveAI:
                 self.page_index.save(str(self._storage_dir / "page_index.pkl"))
             self.rl._save_state()
             self.memory._save_state()
+            if self._persistent_memory:
+                self._persistent_memory.save()
             self._last_checkpoint = time.time()
             logger.debug("Checkpoint saved")
         except Exception as e:
@@ -830,7 +983,7 @@ class AdaptiveAI:
 
     def status(self) -> Dict[str, Any]:
         return {
-            "version": "3.0.1",
+            "version": "4.0.0",
             "vectorless": self._vectorless,
             "documents_indexed": self.page_index.count() if self._vectorless else (self.vector_index.count() if self.vector_index else 0),
             "total_queries": self._total_queries,

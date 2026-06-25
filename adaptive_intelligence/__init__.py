@@ -1,8 +1,8 @@
 """
-Adaptive Intelligence v3 — Self-Improving Retrieval Orchestration Framework
+Adaptive Intelligence v4 — Self-Improving Retrieval Orchestration Framework
 
-v3: PPO/DQN algorithms, cross-encoder reranking, multi-query decomposition,
-pre-trained domain policies, transfer learning, A/B testing.
+v4: Context engineering, MCP integration, agentic workflow,
+persistent memory, incremental learning, tool registry.
 
 Usage:
     from adaptive_intelligence import AdaptiveAI
@@ -11,11 +11,20 @@ Usage:
     engine.ingest("./documents")
     response = engine.ask("What are the key risks?")
 
-    # v3: PPO + reranking + pretrained
-    engine = AdaptiveAI(rl_algorithm="ppo", reranking=True, pretrained_policy=True)
+    # v4: Add tools
+    engine.add_tool("financial", server="http://localhost:8081")
+
+    # v4: Agentic mode
+    response = engine.ask("Deep research on risks", mode="agentic")
+
+    # v4: Memory persists across sessions
+    engine.remember("user_preference", "prefers detailed analysis")
+
+    # v4: MCP server
+    engine.serve_mcp(port=8080)
 """
 
-__version__ = "3.0.1"
+__version__ = "4.0.0"
 __author__ = "Venkatkumar Rajan"
 
 from adaptive_intelligence.core.engine import AdaptiveAI
