@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "adaptive-intelligence"
-version = "4.0.5"
+version = "4.0.6"
 description = "Self-improving retrieval framework with RL routing, context engineering, MCP integration, agentic workflow, and persistent memory."
 readme = {file = "README.md", content-type = "text/markdown"}
 license = {text = "Apache-2.0"}
@@ -45,6 +45,7 @@ xlsx = ["openpyxl>=3.1.0"]
 pptx = ["python-pptx>=0.6.21"]
 sql = ["sqlalchemy>=2.0.0"]
 rerank = ["sentence-transformers>=2.2.0"]
+mcp = ["mcp>=1.0.0"]
 ocr = ["pytesseract>=0.3.10", "Pillow>=10.0"]
 all = [
     "chromadb>=0.4.0",
@@ -58,6 +59,7 @@ all = [
     "pytesseract>=0.3.10",
     "Pillow>=10.0",
     "sentence-transformers>=2.2.0",
+    "mcp>=1.0.0",
 ]
 dev = [
     "pytest>=7.0",

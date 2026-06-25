@@ -24,7 +24,7 @@ Usage:
     engine.serve_mcp(port=8080)
 """
 
-__version__ = "4.0.5"
+__version__ = "4.0.6"
 __author__ = "Venkatkumar Rajan"
 
 from adaptive_intelligence.core.engine import AdaptiveAI

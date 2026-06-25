@@ -3,8 +3,7 @@ Demo 4: MCP Server
 ===================
 
 Serves adaptive-intelligence as an MCP tool.
-Any MCP client (Claude, Cursor, custom apps) can connect
-and use your retrieval as a tool.
+Any MCP client (Claude, Cursor, custom apps) can connect.
 
 Run: python demo_mcp_server.py
 Then in another terminal: python demo_mcp_client.py
@@ -24,27 +23,30 @@ def main():
     print("DEMO 4: MCP Server")
     print("=" * 60)
 
-    # Setup engine with HuggingFace local model
-    # Change llm_backend="none" if you don't have GPU
+    # Using llm_backend="none" for instant startup
+    # For synthesized answers, change to:
+    #   api_key="gsk_...", base_url="https://api.groq.com/openai/v1" (Groq free)
     engine = AdaptiveAI(
-        llm_backend="huggingface",
-        llm_model="Qwen/Qwen2.5-1.5B-Instruct",
+        llm_backend="none",
         vectorless=True,
         storage_dir="./demo_state_mcp",
         log_level="ERROR",
     )
 
+    print("Ingesting documents...")
     engine.ingest("./data/financial")
     engine.ingest("./data/healthcare")
-    print(f"Ingested docs. Ready to serve.")
+
+    # Warmup - run one query to initialize everything
+    print("Warming up...")
+    engine.ask("test query")
+    print(f"Ready. Docs ingested. System warmed up.")
 
     # Start MCP server
     print("\nStarting MCP server on port 8080...")
     print("Any MCP client can now connect to http://localhost:8080")
     print()
     print("Test with: python demo_mcp_client.py (in another terminal)")
-    print("Or connect from Claude Desktop, Cursor, or any MCP client.")
-    print()
     print("Press Ctrl+C to stop.")
     print("-" * 60)
 

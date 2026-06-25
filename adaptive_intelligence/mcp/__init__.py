@@ -4,7 +4,8 @@ Two modes:
 1. MCP Server: Your library serves retrieval as an MCP tool
 2. Tool Registry: Connect external MCP tools (financial, medical, web search)
 
-The RL policy learns which tools to call per query type.
+Uses official `mcp` SDK if installed, falls back to built-in HTTP if not.
+Install: pip install adaptive-intelligence[mcp]
 """
 
 import json
@@ -43,11 +44,7 @@ class ToolConfig:
 
 
 class ToolRegistry:
-    """Registry of external tools the system can call.
-
-    The RL policy learns which tools to call per query type.
-    Tools can be MCP servers, Python functions, or API endpoints.
-    """
+    """Registry of external tools the system can call."""
 
     def __init__(self):
         self._tools: Dict[str, ToolConfig] = {}
@@ -56,16 +53,6 @@ class ToolRegistry:
     def add_tool(self, name: str, description: str = "",
                  server: str = None, function: Callable = None,
                  api_endpoint: str = None, api_key: str = None):
-        """Register a tool.
-
-        Args:
-            name: Tool identifier (e.g., "financial", "medical")
-            description: What the tool does
-            server: MCP server URL
-            function: Python callable
-            api_endpoint: REST API URL
-            api_key: API authentication key
-        """
         if server:
             tool_type = "mcp"
         elif function:
@@ -89,7 +76,6 @@ class ToolRegistry:
 
     def call_tool(self, name: str, query: str,
                   params: Dict = None) -> ToolResult:
-        """Call a registered tool."""
         tool = self._tools.get(name)
         if not tool or not tool.enabled:
             return ToolResult(
@@ -117,13 +103,6 @@ class ToolRegistry:
                 (tool.avg_latency * (tool.call_count - 1) + result.latency)
                 / tool.call_count
             )
-
-            self._call_history.append({
-                "tool": name, "query": query[:100],
-                "success": result.success, "latency": result.latency,
-                "timestamp": time.time(),
-            })
-
             return result
 
         except Exception as e:
@@ -133,9 +112,7 @@ class ToolRegistry:
                 error=str(e), latency=time.time() - start,
             )
 
-    def _call_function(self, tool: ToolConfig, query: str,
-                       params: Dict = None) -> ToolResult:
-        """Call a Python function tool."""
+    def _call_function(self, tool, query, params=None):
         result = tool.function(query, **(params or {}))
         return ToolResult(
             tool_name=tool.name,
@@ -143,9 +120,7 @@ class ToolRegistry:
             success=True,
         )
 
-    def _call_mcp(self, tool: ToolConfig, query: str,
-                  params: Dict = None) -> ToolResult:
-        """Call an MCP server tool."""
+    def _call_mcp(self, tool, query, params=None):
         try:
             import urllib.request
             data = json.dumps({
@@ -157,7 +132,7 @@ class ToolRegistry:
                 tool.server_url, data=data,
                 headers={"Content-Type": "application/json"},
             )
-            with urllib.request.urlopen(req, timeout=30) as resp:
+            with urllib.request.urlopen(req, timeout=60) as resp:
                 response = json.loads(resp.read().decode())
             result_text = response.get("result", {})
             if isinstance(result_text, dict):
@@ -170,9 +145,7 @@ class ToolRegistry:
         except Exception as e:
             return ToolResult(tool_name=tool.name, result="", success=False, error=str(e))
 
-    def _call_api(self, tool: ToolConfig, query: str,
-                  params: Dict = None) -> ToolResult:
-        """Call a REST API tool."""
+    def _call_api(self, tool, query, params=None):
         try:
             import urllib.request
             data = json.dumps({"query": query, **(params or {})}).encode()
@@ -182,7 +155,7 @@ class ToolRegistry:
             req = urllib.request.Request(
                 tool.api_endpoint, data=data, headers=headers,
             )
-            with urllib.request.urlopen(req, timeout=30) as resp:
+            with urllib.request.urlopen(req, timeout=60) as resp:
                 result = resp.read().decode()
             return ToolResult(tool_name=tool.name, result=result, success=True)
         except Exception as e:
@@ -190,21 +163,17 @@ class ToolRegistry:
 
     def select_tools(self, query: str, query_type: str = "",
                      domain: str = "") -> List[str]:
-        """Suggest which tools to call for a query (RL can override)."""
         selected = []
         query_lower = query.lower()
-
         for name, tool in self._tools.items():
             if not tool.enabled:
                 continue
-            # Simple keyword matching for tool selection
             desc_lower = tool.description.lower()
             name_lower = name.lower()
             if any(term in query_lower for term in name_lower.split()):
                 selected.append(name)
             elif any(term in query_lower for term in desc_lower.split()[:5]):
                 selected.append(name)
-
         return selected
 
     def list_tools(self) -> List[Dict[str, Any]]:
@@ -229,16 +198,19 @@ class ToolRegistry:
 class MCPServer:
     """Serve adaptive-intelligence as an MCP tool.
 
-    Any MCP client (Claude, Cursor, custom apps) can connect
-    and use the retrieval as a tool.
+    Uses official `mcp` SDK if installed, falls back to built-in HTTP server.
     """
 
     def __init__(self, engine):
         self.engine = engine
-        self._running = False
+        self._has_mcp_sdk = False
+        try:
+            import mcp
+            self._has_mcp_sdk = True
+        except ImportError:
+            pass
 
     def get_tool_definition(self) -> Dict[str, Any]:
-        """Return MCP tool definition."""
         return {
             "name": "adaptive_intelligence_search",
             "description": "Search documents using adaptive RL-based retrieval. "
@@ -250,33 +222,23 @@ class MCPServer:
                         "type": "string",
                         "description": "The search query",
                     },
-                    "output_format": {
-                        "type": "string",
-                        "enum": ["text", "json", "csv"],
-                        "description": "Output format",
-                        "default": "text",
-                    },
                 },
                 "required": ["query"],
             },
         }
 
     def handle_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
-        """Handle an MCP request."""
         method = request.get("method", "")
 
         if method == "tools/list":
-            return {
-                "tools": [self.get_tool_definition()],
-            }
+            return {"tools": [self.get_tool_definition()]}
 
         elif method == "tools/call":
             params = request.get("params", {})
             args = params.get("arguments", {})
             query = args.get("query", "")
-            output_format = args.get("output_format", "text")
 
-            response = self.engine.ask(query, output_format=output_format if output_format != "text" else None)
+            response = self.engine.ask(query)
 
             return {
                 "content": [{
@@ -296,37 +258,95 @@ class MCPServer:
         return {"error": f"Unknown method: {method}"}
 
     def serve(self, port: int = 8080):
-        """Start MCP server (HTTP/SSE)."""
+        """Start MCP server. Uses official SDK if available, else HTTP fallback."""
+        if self._has_mcp_sdk:
+            self._serve_with_sdk(port)
+        else:
+            self._serve_http(port)
+
+    def _serve_with_sdk(self, port: int):
+        """Serve using official MCP SDK (stdio transport)."""
+        import asyncio
+        from mcp.server import Server
+        from mcp import Tool, types
+
+        server = Server("adaptive-intelligence")
+        engine_ref = self.engine
+
+        @server.list_tools()
+        async def list_tools() -> list[Tool]:
+            return [
+                Tool(
+                    name="adaptive_intelligence_search",
+                    description="Search documents using adaptive RL-based retrieval. "
+                               "Learns which strategy works best per query type.",
+                    inputSchema={
+                        "type": "object",
+                        "properties": {
+                            "query": {
+                                "type": "string",
+                                "description": "The search query",
+                            },
+                        },
+                        "required": ["query"],
+                    },
+                )
+            ]
+
+        @server.call_tool()
+        async def call_tool(name: str, arguments: dict) -> list:
+            if name != "adaptive_intelligence_search":
+                return [types.TextContent(type="text", text=f"Unknown tool: {name}")]
+
+            query = arguments.get("query", "")
+            response = engine_ref.ask(query)
+
+            result_text = (
+                f"{response.answer}\n\n"
+                f"Confidence: {response.confidence:.0%}\n"
+                f"Strategy: {response.retrieval_strategy}"
+            )
+            return [types.TextContent(type="text", text=result_text)]
+
+        async def run_server():
+            from mcp.server.stdio import stdio_server
+            async with stdio_server() as (read_stream, write_stream):
+                print(f"MCP server running (official SDK, stdio transport)")
+                print("Connect via Claude Desktop or any MCP client.")
+                await server.run(read_stream, write_stream,
+                                server.create_initialization_options())
+
+        print(f"Starting MCP server with official SDK...")
+        asyncio.run(run_server())
+
+    def _serve_http(self, port: int):
+        """Fallback: serve via HTTP/JSON-RPC."""
+        from http.server import HTTPServer, BaseHTTPRequestHandler
+        server_ref = self
+
+        class MCPHandler(BaseHTTPRequestHandler):
+            def do_POST(self):
+                length = int(self.headers.get('Content-Length', 0))
+                body = self.rfile.read(length).decode()
+                request = json.loads(body)
+                response = server_ref.handle_request(request)
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "jsonrpc": "2.0",
+                    "result": response,
+                    "id": request.get("id", 1),
+                }).encode())
+
+            def log_message(self, format, *args):
+                pass  # Silent
+
+        httpd = HTTPServer(('0.0.0.0', port), MCPHandler)
+        print(f"MCP server running on http://localhost:{port} (HTTP fallback)")
+        print("Install `pip install mcp` for official SDK with stdio transport.")
+        print("Press Ctrl+C to stop.")
         try:
-            from http.server import HTTPServer, BaseHTTPRequestHandler
-            server_ref = self
-
-            class MCPHandler(BaseHTTPRequestHandler):
-                def do_POST(self):
-                    length = int(self.headers.get('Content-Length', 0))
-                    body = self.rfile.read(length).decode()
-                    request = json.loads(body)
-
-                    response = server_ref.handle_request(request)
-
-                    self.send_response(200)
-                    self.send_header('Content-Type', 'application/json')
-                    self.end_headers()
-                    self.wfile.write(json.dumps({
-                        "jsonrpc": "2.0",
-                        "result": response,
-                        "id": request.get("id", 1),
-                    }).encode())
-
-                def log_message(self, format, *args):
-                    logger.debug(format % args)
-
-            server = HTTPServer(('0.0.0.0', port), MCPHandler)
-            self._running = True
-            logger.info(f"MCP server started on port {port}")
-            print(f"MCP server running on http://localhost:{port}")
-            server.serve_forever()
-
+            httpd.serve_forever()
         except KeyboardInterrupt:
-            self._running = False
-            logger.info("MCP server stopped")
+            print("\nServer stopped.")
