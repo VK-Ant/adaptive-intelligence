@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "adaptive-intelligence"
-version = "4.0.0"
+version = "4.0.1"
 description = "Self-improving retrieval framework with RL routing, context engineering, MCP integration, agentic workflow, and persistent memory."
 readme = "README.md"
 license = {text = "Apache-2.0"}
@@ -67,12 +67,14 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://pypi.org/project/adaptive-intelligence/"
+Homepage = "https://github.com/VK-Ant/adaptive-intelligence"
 Documentation = "https://github.com/VK-Ant/adaptive-intelligence#readme"
 Repository = "https://github.com/VK-Ant/adaptive-intelligence"
 Issues = "https://github.com/VK-Ant/adaptive-intelligence/issues"
 PyPI = "https://pypi.org/project/adaptive-intelligence/"
+Paper = "https://www.researchgate.net/publication/405076088"
 Portfolio = "https://vk-ant.github.io/Venkatkumar/"
+Changelog = "https://github.com/VK-Ant/adaptive-intelligence/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 include = ["adaptive_intelligence*"]
