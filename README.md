@@ -6,6 +6,8 @@ Self-improving retrieval framework that learns, remembers, and connects tools.
 
 Instead of using the same retrieval strategy for every query, adaptive-intelligence uses reinforcement learning to select the best strategy per query type. The system evaluates every response, uses the score as a reward signal, and improves with every query answered.
 
+![Adaptive intelligence](./docs/images/image_ai.png)
+
 ## Install
 
 ```bash
