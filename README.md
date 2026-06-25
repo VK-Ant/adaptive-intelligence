@@ -317,7 +317,7 @@ Contributions are welcome.
 
 ## Also by me
 
-[**llmevalkit**](https://pypi.org/project/llmevalkit/) — 61 metrics for LLM evaluation with HIPAA, GDPR, DPDP, and EU AI Act compliance modules.
+[**llmevalkit**](https://pypi.org/project/llmevalkit/) — 78 metrics for LLM evaluation with HIPAA, GDPR, DPDP, and EU AI Act compliance modules.
 
 adaptive-intelligence was born from llmevalkit. If you can measure LLM quality (llmevalkit), you can use those measurements as a reward signal to improve retrieval (adaptive-intelligence).
 
