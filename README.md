@@ -318,7 +318,7 @@ Contributions are welcome.
 
 ## Also by me
 
-[**llmevalkit**](https://pypi.org/project/llmevalkit/) — 61 metrics for LLM evaluation with HIPAA, GDPR, DPDP, and EU AI Act compliance modules.
+[**llmevalkit**](https://pypi.org/project/llmevalkit/) — LLM evaluation, hallucination detection, AI content detection, compliance, document parsing, governance, security, observability, ground truth testing, conversation evaluation, red team testing, and anomaly detection. 78 metrics across 13 modules. Works with or without API.
 
 adaptive-intelligence was born from llmevalkit. If you can measure LLM quality (llmevalkit), you can use those measurements as a reward signal to improve retrieval (adaptive-intelligence).
 
