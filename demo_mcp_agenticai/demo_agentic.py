@@ -3,10 +3,9 @@ Demo 3: Agentic Multi-Round Retrieval
 ======================================
 
 Shows:
-- System retrieves, evaluates confidence, retrieves again if needed
-- Query refinement between rounds
+- Multi-round retrieval with query refinement
 - Tool calls integrated into agentic loop
-- Final answer synthesized from accumulated context
+- Financial and healthcare scenarios
 
 Run: python demo_agentic.py
 """
@@ -26,7 +25,9 @@ def main():
     print("=" * 60)
 
     engine = AdaptiveAI(
-        llm_backend="none", vectorless=True,
+        llm_backend="huggingface",
+        llm_model="Qwen/Qwen2.5-1.5B-Instruct",
+        vectorless=True,
         storage_dir="./demo_state_agentic",
         log_level="ERROR",
     )
@@ -44,10 +45,9 @@ def main():
     engine.add_tool("trial_lookup", description="clinical trial results",
                      function=clinical_trial_lookup)
 
-    # --- Agentic: Financial scenario ---
+    # --- Scenario 1: Financial ---
     print("\n--- Scenario 1: Financial deep analysis ---")
-    print("Query: Complete supply chain risk analysis with mitigation and Q4 impact")
-    print()
+    print("Query: Complete supply chain risk analysis with mitigation and Q4 impact\n")
 
     r = engine.ask(
         "Analyze the complete supply chain risk: Meridian dependency, "
@@ -55,10 +55,9 @@ def main():
         mode="agentic"
     )
 
-    print(f"Answer:\n{r.answer[:500]}")
-    print(f"\nAgent details:")
+    print(f"Answer: {r.answer[:500]}")
     if hasattr(r, "agent_rounds"):
-        print(f"  Rounds: {r.agent_rounds}")
+        print(f"\nRounds: {r.agent_rounds}")
     if hasattr(r, "agent_steps"):
         for i, step in enumerate(r.agent_steps):
             q = f" - {step.query[:50]}..." if step.query else ""
@@ -67,10 +66,9 @@ def main():
     if hasattr(r, "tools_called") and r.tools_called:
         print(f"  Tools used: {r.tools_called}")
 
-    # --- Agentic: Healthcare scenario ---
+    # --- Scenario 2: Healthcare ---
     print("\n\n--- Scenario 2: Healthcare multi-hop ---")
-    print("Query: Empagliflozin safety for a patient on Metformin with eGFR 40")
-    print()
+    print("Query: Empagliflozin safety for patient on Metformin with eGFR 40\n")
 
     r = engine.ask(
         "Is Empagliflozin safe for a Type 2 Diabetes patient already on "
@@ -78,38 +76,31 @@ def main():
         mode="agentic"
     )
 
-    print(f"Answer:\n{r.answer[:500]}")
-    print(f"\nAgent details:")
+    print(f"Answer: {r.answer[:500]}")
     if hasattr(r, "agent_rounds"):
-        print(f"  Rounds: {r.agent_rounds}")
+        print(f"\nRounds: {r.agent_rounds}")
     if hasattr(r, "agent_steps"):
         for i, step in enumerate(r.agent_steps):
             q = f" - {step.query[:50]}..." if step.query else ""
             t = f" [{step.tool_name}]" if step.tool_name else ""
             print(f"  Step {i+1}: {step.action}{t}{q} ({step.latency:.2f}s)")
 
-    # --- Compare: Standard vs Agentic ---
+    # --- Compare standard vs agentic ---
     print("\n\n--- Comparison: Standard vs Agentic ---")
-
     query = "What is the Meridian supply chain risk and how does Pacific Chip mitigate it?"
 
-    # Standard
     r1 = engine.ask(query)
-    # Agentic
     r2 = engine.ask(query, mode="agentic")
 
     print(f"Query: {query}")
     print(f"\nStandard (1 round):")
     print(f"  Answer: {r1.answer[:200]}...")
-    print(f"  Strategy: {r1.retrieval_strategy}")
 
-    print(f"\nAgentic ({r2.agent_rounds if hasattr(r2, 'agent_rounds') else '?'} rounds):")
+    rounds = r2.agent_rounds if hasattr(r2, "agent_rounds") else "?"
+    print(f"\nAgentic ({rounds} rounds):")
     print(f"  Answer: {r2.answer[:200]}...")
-    if hasattr(r2, "tools_called") and r2.tools_called:
-        print(f"  Tools: {r2.tools_called}")
 
     print("\nAgentic mode finds more context through multiple rounds and tool calls.")
-    print("Use standard mode for simple queries. Agentic for complex analysis.")
 
 
 if __name__ == "__main__":

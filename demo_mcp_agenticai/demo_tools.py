@@ -5,8 +5,7 @@ Demo 2: Tool Registry + Cost Optimization
 Shows:
 - Register Python functions as tools
 - RL learns WHICH tools to call per query
-- Tools that don't help get skipped = lower cost
-- RL learns optimal retrieval depth = fewer tokens = lower LLM cost
+- Cost optimization through smarter retrieval
 
 Run: python demo_tools.py
 """
@@ -26,12 +25,13 @@ def main():
     print("=" * 60)
 
     engine = AdaptiveAI(
-        llm_backend="none", vectorless=True,
+        llm_backend="huggingface",
+        llm_model="Qwen/Qwen2.5-1.5B-Instruct",
+        vectorless=True,
         storage_dir="./demo_state_tools",
         log_level="ERROR",
     )
 
-    # Ingest both domains
     engine.ingest("./data/financial")
     engine.ingest("./data/healthcare")
 
@@ -97,26 +97,13 @@ def main():
     for t in engine.list_tools():
         print(f"{t['name']:<20} {t['calls']:<8} {t['success_rate']:.0%}       {t['avg_latency']}")
 
-    # --- Cost optimization explanation ---
+    # --- Cost optimization ---
     print("\n--- Cost Optimization ---")
     print("How adaptive-intelligence reduces costs:")
-    print()
-    print("1. RETRIEVAL DEPTH: RL learns optimal depth per query type")
-    print("   Factual query: depth 2 (2 chunks, ~400 tokens)")
-    print("   Complex query: depth 8 (8 chunks, ~1600 tokens)")
-    print("   Static RAG: always depth 10 (~2000 tokens)")
-    print("   Saving: ~55% fewer tokens on average")
-    print()
-    print("2. TOOL SELECTION: RL skips tools that don't improve answers")
-    print("   Revenue query: calls revenue_calc, skips drug_checker")
-    print("   Medical query: calls drug_checker, skips revenue_calc")
-    print("   Static system: calls all tools every time")
-    print()
-    print("3. GRAPH ACTIVATION: 70% of queries skip graph traversal")
-    print("   Factual queries: graph OFF (saves 15-20ms)")
-    print("   Relational queries: graph ON (finds entity connections)")
-    print()
-    print("Combined: fewer tokens + fewer tool calls + less compute = lower cost")
+    print("  1. RL learns optimal depth: depth 2 for factual, depth 8 for complex")
+    print("  2. RL skips tools that don't improve answers")
+    print("  3. Graph activation skipped on 70% of queries")
+    print("  Combined: fewer tokens + fewer tool calls + less compute = lower cost")
 
 
 if __name__ == "__main__":

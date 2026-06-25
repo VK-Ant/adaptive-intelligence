@@ -441,7 +441,7 @@ class AdaptiveAI:
                         tool_results.append({"tool": tr.tool_name, "result": tr.result})
 
             # Build optimized context window
-            domain_str = config.domain.value if hasattr(config.domain, 'value') else str(config.domain)
+            domain_str = self.config.domain.value if hasattr(self.config.domain, 'value') else str(self.config.domain)
             ctx = self._context_engineer.build_context(
                 query=query, chunks=retrieved_chunks,
                 memory_entries=memory_entries,

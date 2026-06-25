@@ -24,9 +24,12 @@ def main():
     print("DEMO 4: MCP Server")
     print("=" * 60)
 
-    # Setup engine
+    # Setup engine with HuggingFace local model
+    # Change llm_backend="none" if you don't have GPU
     engine = AdaptiveAI(
-        llm_backend="none", vectorless=True,
+        llm_backend="huggingface",
+        llm_model="Qwen/Qwen2.5-1.5B-Instruct",
+        vectorless=True,
         storage_dir="./demo_state_mcp",
         log_level="ERROR",
     )

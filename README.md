@@ -10,7 +10,6 @@
 [![Python](https://img.shields.io/pypi/pyversions/adaptive-intelligence)](https://pypi.org/project/adaptive-intelligence/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
 [![Paper](https://img.shields.io/badge/Paper-ResearchGate-00CCBB)](https://www.researchgate.net/publication/405076088)
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/VK-Ant/adaptive-intelligence/blob/main/notebooks/adaptive_intelligence_v4_demo.ipynb)
 
 [PyPI](https://pypi.org/project/adaptive-intelligence/) · [Paper](https://www.researchgate.net/publication/405076088) · [Portfolio](https://vk-ant.github.io/Venkatkumar/) · [llmevalkit](https://pypi.org/project/llmevalkit/)
 
@@ -318,7 +317,7 @@ Contributions are welcome.
 
 ## Also by me
 
-[**llmevalkit**](https://pypi.org/project/llmevalkit/) — 78 metrics for LLM evaluation with HIPAA, GDPR, DPDP, and EU AI Act compliance modules.
+[**llmevalkit**](https://pypi.org/project/llmevalkit/) — 61 metrics for LLM evaluation with HIPAA, GDPR, DPDP, and EU AI Act compliance modules.
 
 adaptive-intelligence was born from llmevalkit. If you can measure LLM quality (llmevalkit), you can use those measurements as a reward signal to improve retrieval (adaptive-intelligence).
 

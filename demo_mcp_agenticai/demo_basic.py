@@ -6,7 +6,6 @@ Shows:
 - Ingest documents, ask questions
 - Add MORE documents later without restart
 - RL policy, graph, memory all preserved
-- System continues learning from where it left off
 
 Run: python demo_basic.py
 """
@@ -26,7 +25,8 @@ def main():
     # --- Phase 1: Financial documents ---
     print("\n--- Phase 1: Ingest financial documents ---")
     engine = AdaptiveAI(
-        llm_backend="none", vectorless=True,
+        llm_backend="huggingface",
+        llm_model="Qwen/Qwen2.5-1.5B-Instruct",
         domain="financial",
         storage_dir="./demo_state",
         log_level="ERROR",
@@ -48,6 +48,8 @@ def main():
     for q in queries:
         r = engine.ask(q)
         print(f"{r.retrieval_strategy:<30} {r.confidence:.0%}    {q}")
+        print(f"  Answer: {r.answer[:150]}...")
+        print()
 
     # --- Phase 2: Add healthcare docs WITHOUT restart ---
     print("\n--- Phase 2: Add healthcare documents (no restart) ---")
@@ -70,12 +72,10 @@ def main():
     for q in healthcare_queries:
         r = engine.ask(q)
         print(f"{r.retrieval_strategy:<30} {r.confidence:.0%}    {q}")
+        print(f"  Answer: {r.answer[:150]}...")
+        print()
 
-    # Dashboard
-    print("\n--- System Status ---")
-    print(engine.dashboard())
-
-    print("\nKey point: Added 3 healthcare docs to existing 3 financial docs.")
+    print("\nKey point: Added healthcare docs to existing financial docs.")
     print("No restart. No re-training. RL continued learning seamlessly.")
 
 
