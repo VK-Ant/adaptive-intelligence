@@ -126,6 +126,8 @@ engine.feedback(response.query_id, "good")   # +0.2 RL reward
 engine.feedback(response.query_id, "bad")    # -0.3 RL reward + prompt evolution
 ```
 
+### Harness Agent & Looping Engineering - [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/VK-Ant/adaptive-intelligence/blob/main/notebooks/adaptive_intelligence_harness_demo.ipynb)
+
 ### Harness Agent
 Evaluates every pipeline decision, not just the final answer. Tells the RL exactly what worked and what was wasted — route selection, retrieval depth, graph activation, tool calls, agentic rounds.
 
@@ -186,7 +188,7 @@ engine = AdaptiveAI(llm_backend="huggingface", llm_model="Qwen/Qwen2.5-1.5B-Inst
 engine = AdaptiveAI(llm_backend="none")
 ```
 
-### Paid
+### API Key based one
 
 ```python
 # OpenAI

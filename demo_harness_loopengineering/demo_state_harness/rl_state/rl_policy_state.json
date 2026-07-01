@@ -1,41 +1,41 @@
 {
-  "total_queries": 25,
-  "exploration_rate": 0.18927091596268858,
+  "total_queries": 50,
+  "exploration_rate": 0.16697863346374528,
   "arms": {
     "structured_lookup:moderate:financial:table:table_first:d5:g0": {
-      "alpha": 2.471598915195465,
-      "beta": 1.528401084804535,
-      "total_pulls": 2,
-      "total_reward": 1.471598915195465,
-      "mean": 0.6178997287988662
+      "alpha": 3.9547980521202084,
+      "beta": 2.0452019478797916,
+      "total_pulls": 4,
+      "total_reward": 2.9547980521202084,
+      "mean": 0.6591330086867014
     },
     "relational:moderate:operational:graph:page_graph:d5:g1": {
-      "alpha": 1.7043983163674674,
-      "beta": 1.2956016836325326,
-      "total_pulls": 1,
-      "total_reward": 0.7043983163674674,
-      "mean": 0.5681327721224891
+      "alpha": 2.4143969915548964,
+      "beta": 1.5856030084451036,
+      "total_pulls": 2,
+      "total_reward": 1.4143969915548964,
+      "mean": 0.6035992478887241
     },
     "comparative:moderate:financial:page_bm25:d5:g0": {
-      "alpha": 1.6383993173281353,
-      "beta": 1.3616006826718647,
-      "total_pulls": 1,
-      "total_reward": 0.6383993173281353,
-      "mean": 0.5461331057760451
+      "alpha": 2.2883986652533217,
+      "beta": 1.7116013347466783,
+      "total_pulls": 2,
+      "total_reward": 1.2883986652533217,
+      "mean": 0.5720996663133304
     },
     "factual:simple:general:keyword_only:d3:g0": {
-      "alpha": 3.5783986378351855,
-      "beta": 2.4216013621648145,
-      "total_pulls": 4,
-      "total_reward": 2.578398637835185,
-      "mean": 0.5963997729725309
+      "alpha": 5.511998081127803,
+      "beta": 3.4880019188721967,
+      "total_pulls": 7,
+      "total_reward": 4.511998081127802,
+      "mean": 0.6124442312364226
     },
     "factual:simple:healthcare:keyword_only:d3:g0": {
-      "alpha": 1.6975996252854664,
-      "beta": 1.3024003747145336,
-      "total_pulls": 1,
-      "total_reward": 0.6975996252854664,
-      "mean": 0.5658665417618222
+      "alpha": 2.412799389251073,
+      "beta": 1.5872006107489272,
+      "total_pulls": 2,
+      "total_reward": 1.4127993892510728,
+      "mean": 0.6031998473127682
     },
     "factual:simple:financial:keyword_only:d3:g0": {
       "alpha": 1.7799996074040731,
@@ -45,25 +45,25 @@
       "mean": 0.5933332024680243
     },
     "structured_lookup:simple:financial:table:table_first:d3:g0": {
-      "alpha": 5.679998169740041,
-      "beta": 2.320001830259959,
-      "total_pulls": 6,
-      "total_reward": 4.679998169740041,
-      "mean": 0.7099997712175051
+      "alpha": 6.459997813304265,
+      "beta": 2.5400021866957347,
+      "total_pulls": 7,
+      "total_reward": 5.459997813304265,
+      "mean": 0.717777534811585
     },
     "factual:moderate:general:keyword_only:d5:g0": {
-      "alpha": 1.7799997286001843,
-      "beta": 1.2200002713998157,
-      "total_pulls": 1,
-      "total_reward": 0.7799997286001842,
-      "mean": 0.5933332428667281
+      "alpha": 2.559999511639277,
+      "beta": 1.4400004883607227,
+      "total_pulls": 2,
+      "total_reward": 1.559999511639277,
+      "mean": 0.6399998779098193
     },
     "factual:simple:general:page_graph:d10:g0": {
-      "alpha": 1.5975997115135194,
-      "beta": 1.4024002884864806,
-      "total_pulls": 1,
-      "total_reward": 0.5975997115135193,
-      "mean": 0.5325332371711732
+      "alpha": 2.9159990924199426,
+      "beta": 2.0840009075800574,
+      "total_pulls": 3,
+      "total_reward": 1.9159990924199426,
+      "mean": 0.5831998184839885
     },
     "structured_lookup:simple:financial:table:page_bm25:d15:g1": {
       "alpha": 3.339998998641968,
@@ -73,18 +73,39 @@
       "mean": 0.6679997997283935
     },
     "structured_lookup:simple:financial:table:page_bm25:d8:g1": {
-      "alpha": 3.3399992418289184,
-      "beta": 1.6600007581710816,
-      "total_pulls": 3,
-      "total_reward": 2.3399992418289184,
-      "mean": 0.6679998483657836
+      "alpha": 5.679998636643092,
+      "beta": 2.3200013633569085,
+      "total_pulls": 6,
+      "total_reward": 4.679998636643092,
+      "mean": 0.7099998295803865
     },
     "structured_lookup:simple:financial:table:page_graph:d8:g0": {
-      "alpha": 1.7799998013178508,
-      "beta": 1.2200001986821492,
+      "alpha": 4.899998683929445,
+      "beta": 2.100001316070556,
+      "total_pulls": 5,
+      "total_reward": 3.899998683929444,
+      "mean": 0.6999998119899206
+    },
+    "factual:simple:financial:page_graph:d8:g1": {
+      "alpha": 1.779999667008718,
+      "beta": 1.220000332991282,
       "total_pulls": 1,
-      "total_reward": 0.7799998013178507,
-      "mean": 0.5933332671059502
+      "total_reward": 0.7799996670087179,
+      "mean": 0.5933332223362393
+    },
+    "structured_lookup:simple:financial:table:table_first:d8:g0": {
+      "alpha": 4.11999907930692,
+      "beta": 1.8800009206930794,
+      "total_pulls": 4,
+      "total_reward": 3.11999907930692,
+      "mean": 0.68666651321782
+    },
+    "structured_lookup:simple:financial:table:page_graph:d5:g0": {
+      "alpha": 1.779999806880951,
+      "beta": 1.220000193119049,
+      "total_pulls": 1,
+      "total_reward": 0.7799998068809509,
+      "mean": 0.593333268960317
     }
   },
   "experiences": [
@@ -938,6 +959,857 @@
       },
       "reward": 0.7799997194608053,
       "timestamp": 1782876319.094152
+    },
+    {
+      "query_id": "bb091e237471",
+      "state": {
+        "query_type": "structured_lookup",
+        "complexity": "moderate",
+        "domain": "financial",
+        "entities": [],
+        "intent": "extract",
+        "has_relationship_indicators": false,
+        "has_temporal_markers": true,
+        "temporal_markers": [
+          "Q3"
+        ],
+        "confidence": 0.75,
+        "suggested_indexes": [
+          "table",
+          "keyword"
+        ],
+        "requires_graph": false,
+        "requires_table": true
+      },
+      "action": {
+        "retrieval_route": "table_first",
+        "retrieval_depth": 5,
+        "graph_activation": false,
+        "graph_depth": 0,
+        "prompt_template": "extraction",
+        "verification_level": "none",
+        "was_exploration": false,
+        "action_confidence": 0.6178997287988662
+      },
+      "reward": 0.7799994206428528,
+      "timestamp": 1782912408.593615
+    },
+    {
+      "query_id": "7f96d92bd3c2",
+      "state": {
+        "query_type": "relational",
+        "complexity": "moderate",
+        "domain": "operational",
+        "entities": [
+          "Meridian"
+        ],
+        "intent": "analyze_risk",
+        "has_relationship_indicators": true,
+        "has_temporal_markers": false,
+        "temporal_markers": [],
+        "confidence": 0.9,
+        "suggested_indexes": [
+          "graph",
+          "vector"
+        ],
+        "requires_graph": true,
+        "requires_table": false
+      },
+      "action": {
+        "retrieval_route": "page_graph",
+        "retrieval_depth": 5,
+        "graph_activation": true,
+        "graph_depth": 2,
+        "prompt_template": "extraction",
+        "verification_level": "none",
+        "was_exploration": false,
+        "action_confidence": 0.5681327721224891
+      },
+      "reward": 0.709998675187429,
+      "timestamp": 1782912408.5954468
+    },
+    {
+      "query_id": "c95240a90a49",
+      "state": {
+        "query_type": "comparative",
+        "complexity": "moderate",
+        "domain": "financial",
+        "entities": [
+          "Compare"
+        ],
+        "intent": "compare",
+        "has_relationship_indicators": false,
+        "has_temporal_markers": true,
+        "temporal_markers": [
+          "Q2",
+          "Q3"
+        ],
+        "confidence": 0.9,
+        "suggested_indexes": [
+          "vector",
+          "keyword"
+        ],
+        "requires_graph": false,
+        "requires_table": false
+      },
+      "action": {
+        "retrieval_route": "page_bm25",
+        "retrieval_depth": 5,
+        "graph_activation": false,
+        "graph_depth": 0,
+        "prompt_template": "comparison",
+        "verification_level": "none",
+        "was_exploration": false,
+        "action_confidence": 0.5461331057760451
+      },
+      "reward": 0.6499993479251863,
+      "timestamp": 1782912408.5967205
+    },
+    {
+      "query_id": "cd444eba33a4",
+      "state": {
+        "query_type": "factual",
+        "complexity": "simple",
+        "domain": "general",
+        "entities": [
+          "Metformin"
+        ],
+        "intent": "extract",
+        "has_relationship_indicators": false,
+        "has_temporal_markers": false,
+        "temporal_markers": [],
+        "confidence": 0.6,
+        "suggested_indexes": [
+          "keyword",
+          "vector"
+        ],
+        "requires_graph": false,
+        "requires_table": false
+      },
+      "action": {
+        "retrieval_route": "page_graph",
+        "retrieval_depth": 10,
+        "graph_activation": false,
+        "graph_depth": 0,
+        "prompt_template": "extraction",
+        "verification_level": "none",
+        "was_exploration": false,
+        "action_confidence": 0.5325332371711732
+      },
+      "reward": 0.6651997266133627,
+      "timestamp": 1782912408.597476
+    },
+    {
+      "query_id": "5195539a8f2c",
+      "state": {
+        "query_type": "factual",
+        "complexity": "simple",
+        "domain": "healthcare",
+        "entities": [
+          "Metformin"
+        ],
+        "intent": "extract",
+        "has_relationship_indicators": false,
+        "has_temporal_markers": false,
+        "temporal_markers": [],
+        "confidence": 0.8,
+        "suggested_indexes": [
+          "keyword",
+          "vector"
+        ],
+        "requires_graph": false,
+        "requires_table": false
+      },
+      "action": {
+        "retrieval_route": "keyword_only",
+        "retrieval_depth": 3,
+        "graph_activation": false,
+        "graph_depth": 0,
+        "prompt_template": "extraction",
+        "verification_level": "none",
+        "was_exploration": false,
+        "action_confidence": 0.5658665417618222
+      },
+      "reward": 0.7151997639656066,
+      "timestamp": 1782912408.5980694
+    },
+    {
+      "query_id": "331743febdb5",
+      "state": {
+        "query_type": "factual",
+        "complexity": "simple",
+        "domain": "financial",
+        "entities": [
+          "EBITDA"
+        ],
+        "intent": "extract",
+        "has_relationship_indicators": false,
+        "has_temporal_markers": false,
+        "temporal_markers": [],
+        "confidence": 0.75,
+        "suggested_indexes": [
+          "keyword",
+          "vector"
+        ],
+        "requires_graph": false,
+        "requires_table": false
+      },
+      "action": {
+        "retrieval_route": "page_graph",
+        "retrieval_depth": 8,
+        "graph_activation": true,
+        "graph_depth": 3,
+        "prompt_template": "comparison",
+        "verification_level": "citation",
+        "was_exploration": true,
+        "action_confidence": 0.0
+      },
+      "reward": 0.7799996670087179,
+      "timestamp": 1782912408.6007211
+    },
+    {
+      "query_id": "2215ea52ec44",
+      "state": {
+        "query_type": "structured_lookup",
+        "complexity": "moderate",
+        "domain": "financial",
+        "entities": [
+          "Revenue"
+        ],
+        "intent": "extract",
+        "has_relationship_indicators": false,
+        "has_temporal_markers": true,
+        "temporal_markers": [
+          "Q3"
+        ],
+        "confidence": 0.85,
+        "suggested_indexes": [
+          "table",
+          "keyword"
+        ],
+        "requires_graph": false,
+        "requires_table": true
+      },
+      "action": {
+        "retrieval_route": "table_first",
+        "retrieval_depth": 5,
+        "graph_activation": false,
+        "graph_depth": 0,
+        "prompt_template": "extraction",
+        "verification_level": "none",
+        "was_exploration": false,
+        "action_confidence": 0.6503196671676635
+      },
+      "reward": 0.7031997162818908,
+      "timestamp": 1782912408.6011178
+    },
+    {
+      "query_id": "132ab4579845",
+      "state": {
+        "query_type": "structured_lookup",
+        "complexity": "simple",
+        "domain": "financial",
+        "entities": [
+          "Operating"
+        ],
+        "intent": "extract",
+        "has_relationship_indicators": false,
+        "has_temporal_markers": false,
+        "temporal_markers": [],
+        "confidence": 0.75,
+        "suggested_indexes": [
+          "table",
+          "keyword"
+        ],
+        "requires_graph": false,
+        "requires_table": true
+      },
+      "action": {
+        "retrieval_route": "page_graph",
+        "retrieval_depth": 8,
+        "graph_activation": false,
+        "graph_depth": 0,
+        "prompt_template": "extraction",
+        "verification_level": "none",
+        "was_exploration": false,
+        "action_confidence": 0.5933332671059502
+      },
+      "reward": 0.7799998072783153,
+      "timestamp": 1782912408.601438
+    },
+    {
+      "query_id": "f9142eab58a3",
+      "state": {
+        "query_type": "factual",
+        "complexity": "simple",
+        "domain": "general",
+        "entities": [
+          "Cash"
+        ],
+        "intent": "extract",
+        "has_relationship_indicators": false,
+        "has_temporal_markers": false,
+        "temporal_markers": [],
+        "confidence": 0.6,
+        "suggested_indexes": [
+          "keyword",
+          "vector"
+        ],
+        "requires_graph": false,
+        "requires_table": false
+      },
+      "action": {
+        "retrieval_route": "keyword_only",
+        "retrieval_depth": 3,
+        "graph_activation": false,
+        "graph_depth": 0,
+        "prompt_template": "extraction",
+        "verification_level": "none",
+        "was_exploration": false,
+        "action_confidence": 0.5963997729725309
+      },
+      "reward": 0.6531998152256013,
+      "timestamp": 1782912408.6019018
+    },
+    {
+      "query_id": "92da1d69dbca",
+      "state": {
+        "query_type": "factual",
+        "complexity": "moderate",
+        "domain": "general",
+        "entities": [],
+        "intent": "extract",
+        "has_relationship_indicators": false,
+        "has_temporal_markers": true,
+        "temporal_markers": [
+          "Q4"
+        ],
+        "confidence": 0.6,
+        "suggested_indexes": [
+          "keyword",
+          "vector"
+        ],
+        "requires_graph": false,
+        "requires_table": false
+      },
+      "action": {
+        "retrieval_route": "keyword_only",
+        "retrieval_depth": 5,
+        "graph_activation": false,
+        "graph_depth": 0,
+        "prompt_template": "extraction",
+        "verification_level": "none",
+        "was_exploration": false,
+        "action_confidence": 0.5933332428667281
+      },
+      "reward": 0.779999783039093,
+      "timestamp": 1782912408.6022696
+    },
+    {
+      "query_id": "46f04e7fe698",
+      "state": {
+        "query_type": "factual",
+        "complexity": "simple",
+        "domain": "general",
+        "entities": [],
+        "intent": "extract",
+        "has_relationship_indicators": false,
+        "has_temporal_markers": false,
+        "temporal_markers": [],
+        "confidence": 0.5,
+        "suggested_indexes": [
+          "keyword",
+          "vector"
+        ],
+        "requires_graph": false,
+        "requires_table": false
+      },
+      "action": {
+        "retrieval_route": "page_graph",
+        "retrieval_depth": 10,
+        "graph_activation": false,
+        "graph_depth": 0,
+        "prompt_template": "extraction",
+        "verification_level": "none",
+        "was_exploration": false,
+        "action_confidence": 0.5656998595317205
+      },
+      "reward": 0.6531996542930604,
+      "timestamp": 1782912408.604662
+    },
+    {
+      "query_id": "1c0db0dd3c22",
+      "state": {
+        "query_type": "structured_lookup",
+        "complexity": "simple",
+        "domain": "financial",
+        "entities": [
+          "Product"
+        ],
+        "intent": "extract",
+        "has_relationship_indicators": false,
+        "has_temporal_markers": false,
+        "temporal_markers": [],
+        "confidence": 0.75,
+        "suggested_indexes": [
+          "table",
+          "keyword"
+        ],
+        "requires_graph": false,
+        "requires_table": true
+      },
+      "action": {
+        "retrieval_route": "page_bm25",
+        "retrieval_depth": 8,
+        "graph_activation": true,
+        "graph_depth": 2,
+        "prompt_template": "extraction",
+        "verification_level": "none",
+        "was_exploration": false,
+        "action_confidence": 0.6679998483657836
+      },
+      "reward": 0.779999783039093,
+      "timestamp": 1782912408.6050868
+    },
+    {
+      "query_id": "1f1f277de790",
+      "state": {
+        "query_type": "structured_lookup",
+        "complexity": "simple",
+        "domain": "financial",
+        "entities": [
+          "Services"
+        ],
+        "intent": "extract",
+        "has_relationship_indicators": false,
+        "has_temporal_markers": false,
+        "temporal_markers": [],
+        "confidence": 0.75,
+        "suggested_indexes": [
+          "table",
+          "keyword"
+        ],
+        "requires_graph": false,
+        "requires_table": true
+      },
+      "action": {
+        "retrieval_route": "page_graph",
+        "retrieval_depth": 8,
+        "graph_activation": false,
+        "graph_depth": 0,
+        "prompt_template": "extraction",
+        "verification_level": "none",
+        "was_exploration": false,
+        "action_confidence": 0.6399999021490416
+      },
+      "reward": 0.7799997778733572,
+      "timestamp": 1782912408.605452
+    },
+    {
+      "query_id": "6d042aad5e87",
+      "state": {
+        "query_type": "factual",
+        "complexity": "simple",
+        "domain": "general",
+        "entities": [
+          "Empagliflozin"
+        ],
+        "intent": "extract",
+        "has_relationship_indicators": false,
+        "has_temporal_markers": false,
+        "temporal_markers": [],
+        "confidence": 0.6,
+        "suggested_indexes": [
+          "keyword",
+          "vector"
+        ],
+        "requires_graph": false,
+        "requires_table": false
+      },
+      "action": {
+        "retrieval_route": "keyword_only",
+        "retrieval_depth": 3,
+        "graph_activation": false,
+        "graph_depth": 0,
+        "prompt_template": "extraction",
+        "verification_level": "none",
+        "was_exploration": false,
+        "action_confidence": 0.6045140647229695
+      },
+      "reward": 0.6651998152256012,
+      "timestamp": 1782912408.6058104
+    },
+    {
+      "query_id": "5fd690ce421e",
+      "state": {
+        "query_type": "factual",
+        "complexity": "simple",
+        "domain": "general",
+        "entities": [],
+        "intent": "extract",
+        "has_relationship_indicators": false,
+        "has_temporal_markers": false,
+        "temporal_markers": [],
+        "confidence": 0.5,
+        "suggested_indexes": [
+          "keyword",
+          "vector"
+        ],
+        "requires_graph": false,
+        "requires_table": false
+      },
+      "action": {
+        "retrieval_route": "keyword_only",
+        "retrieval_depth": 3,
+        "graph_activation": false,
+        "graph_depth": 0,
+        "prompt_template": "extraction",
+        "verification_level": "none",
+        "was_exploration": false,
+        "action_confidence": 0.6120997835357985
+      },
+      "reward": 0.6151998128414153,
+      "timestamp": 1782912408.6061852
+    },
+    {
+      "query_id": "0bdd1e1f7ab9",
+      "state": {
+        "query_type": "structured_lookup",
+        "complexity": "simple",
+        "domain": "financial",
+        "entities": [
+          "Revenue"
+        ],
+        "intent": "extract",
+        "has_relationship_indicators": false,
+        "has_temporal_markers": false,
+        "temporal_markers": [],
+        "confidence": 0.75,
+        "suggested_indexes": [
+          "table",
+          "keyword"
+        ],
+        "requires_graph": false,
+        "requires_table": true
+      },
+      "action": {
+        "retrieval_route": "table_first",
+        "retrieval_depth": 8,
+        "graph_activation": false,
+        "graph_depth": 0,
+        "prompt_template": "analysis",
+        "verification_level": "citation",
+        "was_exploration": true,
+        "action_confidence": 0.0
+      },
+      "reward": 0.7799996825059256,
+      "timestamp": 1782912408.6100929
+    },
+    {
+      "query_id": "5e2a2d61700d",
+      "state": {
+        "query_type": "structured_lookup",
+        "complexity": "simple",
+        "domain": "financial",
+        "entities": [
+          "Revenue"
+        ],
+        "intent": "extract",
+        "has_relationship_indicators": false,
+        "has_temporal_markers": false,
+        "temporal_markers": [],
+        "confidence": 0.75,
+        "suggested_indexes": [
+          "table",
+          "keyword"
+        ],
+        "requires_graph": false,
+        "requires_table": true
+      },
+      "action": {
+        "retrieval_route": "page_bm25",
+        "retrieval_depth": 8,
+        "graph_activation": true,
+        "graph_depth": 2,
+        "prompt_template": "extraction",
+        "verification_level": "none",
+        "was_exploration": false,
+        "action_confidence": 0.6866665041446686
+      },
+      "reward": 0.7799997933705648,
+      "timestamp": 1782912408.6104484
+    },
+    {
+      "query_id": "9f4903892d95",
+      "state": {
+        "query_type": "structured_lookup",
+        "complexity": "simple",
+        "domain": "financial",
+        "entities": [
+          "Revenue"
+        ],
+        "intent": "extract",
+        "has_relationship_indicators": false,
+        "has_temporal_markers": false,
+        "temporal_markers": [],
+        "confidence": 0.75,
+        "suggested_indexes": [
+          "table",
+          "keyword"
+        ],
+        "requires_graph": false,
+        "requires_table": true
+      },
+      "action": {
+        "retrieval_route": "page_bm25",
+        "retrieval_depth": 8,
+        "graph_activation": true,
+        "graph_depth": 2,
+        "prompt_template": "extraction",
+        "verification_level": "none",
+        "was_exploration": false,
+        "action_confidence": 0.6999998311769395
+      },
+      "reward": 0.7799998184045156,
+      "timestamp": 1782912408.6107626
+    },
+    {
+      "query_id": "e06b0b38a4a9",
+      "state": {
+        "query_type": "structured_lookup",
+        "complexity": "simple",
+        "domain": "financial",
+        "entities": [
+          "Revenue"
+        ],
+        "intent": "extract",
+        "has_relationship_indicators": false,
+        "has_temporal_markers": false,
+        "temporal_markers": [],
+        "confidence": 0.75,
+        "suggested_indexes": [
+          "table",
+          "keyword"
+        ],
+        "requires_graph": false,
+        "requires_table": true
+      },
+      "action": {
+        "retrieval_route": "table_first",
+        "retrieval_depth": 8,
+        "graph_activation": false,
+        "graph_depth": 0,
+        "prompt_template": "extraction",
+        "verification_level": "none",
+        "was_exploration": false,
+        "action_confidence": 0.5933332275019753
+      },
+      "reward": 0.7799998076756796,
+      "timestamp": 1782912408.6110766
+    },
+    {
+      "query_id": "7b37dffbb2ec",
+      "state": {
+        "query_type": "structured_lookup",
+        "complexity": "simple",
+        "domain": "financial",
+        "entities": [
+          "Revenue"
+        ],
+        "intent": "extract",
+        "has_relationship_indicators": false,
+        "has_temporal_markers": false,
+        "temporal_markers": [],
+        "confidence": 0.75,
+        "suggested_indexes": [
+          "table",
+          "keyword"
+        ],
+        "requires_graph": false,
+        "requires_table": true
+      },
+      "action": {
+        "retrieval_route": "table_first",
+        "retrieval_depth": 8,
+        "graph_activation": false,
+        "graph_depth": 0,
+        "prompt_template": "extraction",
+        "verification_level": "none",
+        "was_exploration": false,
+        "action_confidence": 0.6399998725454012
+      },
+      "reward": 0.77999981880188,
+      "timestamp": 1782912408.6113806
+    },
+    {
+      "query_id": "49afd4abe972",
+      "state": {
+        "query_type": "structured_lookup",
+        "complexity": "simple",
+        "domain": "financial",
+        "entities": [
+          "Revenue"
+        ],
+        "intent": "extract",
+        "has_relationship_indicators": false,
+        "has_temporal_markers": false,
+        "temporal_markers": [],
+        "confidence": 0.75,
+        "suggested_indexes": [
+          "table",
+          "keyword"
+        ],
+        "requires_graph": false,
+        "requires_table": true
+      },
+      "action": {
+        "retrieval_route": "table_first",
+        "retrieval_depth": 3,
+        "graph_activation": false,
+        "graph_depth": 0,
+        "prompt_template": "extraction",
+        "verification_level": "none",
+        "was_exploration": false,
+        "action_confidence": 0.7099997712175051
+      },
+      "reward": 0.7799996435642242,
+      "timestamp": 1782912408.614214
+    },
+    {
+      "query_id": "56e2c3edad87",
+      "state": {
+        "query_type": "structured_lookup",
+        "complexity": "simple",
+        "domain": "financial",
+        "entities": [
+          "Revenue"
+        ],
+        "intent": "extract",
+        "has_relationship_indicators": false,
+        "has_temporal_markers": false,
+        "temporal_markers": [],
+        "confidence": 0.75,
+        "suggested_indexes": [
+          "table",
+          "keyword"
+        ],
+        "requires_graph": false,
+        "requires_table": true
+      },
+      "action": {
+        "retrieval_route": "page_graph",
+        "retrieval_depth": 8,
+        "graph_activation": false,
+        "graph_depth": 0,
+        "prompt_template": "extraction",
+        "verification_level": "none",
+        "was_exploration": false,
+        "action_confidence": 0.6679998772939048
+      },
+      "reward": 0.7799997957547506,
+      "timestamp": 1782912408.6145732
+    },
+    {
+      "query_id": "596186ba016c",
+      "state": {
+        "query_type": "structured_lookup",
+        "complexity": "simple",
+        "domain": "financial",
+        "entities": [
+          "Revenue"
+        ],
+        "intent": "extract",
+        "has_relationship_indicators": false,
+        "has_temporal_markers": false,
+        "temporal_markers": [],
+        "confidence": 0.75,
+        "suggested_indexes": [
+          "table",
+          "keyword"
+        ],
+        "requires_graph": false,
+        "requires_table": true
+      },
+      "action": {
+        "retrieval_route": "table_first",
+        "retrieval_depth": 8,
+        "graph_activation": false,
+        "graph_depth": 0,
+        "prompt_template": "verification",
+        "verification_level": "none",
+        "was_exploration": true,
+        "action_confidence": 0.0
+      },
+      "reward": 0.7799997703234355,
+      "timestamp": 1782912408.6149437
+    },
+    {
+      "query_id": "5e0fa8326f92",
+      "state": {
+        "query_type": "structured_lookup",
+        "complexity": "simple",
+        "domain": "financial",
+        "entities": [
+          "Revenue"
+        ],
+        "intent": "extract",
+        "has_relationship_indicators": false,
+        "has_temporal_markers": false,
+        "temporal_markers": [],
+        "confidence": 0.75,
+        "suggested_indexes": [
+          "table",
+          "keyword"
+        ],
+        "requires_graph": false,
+        "requires_table": true
+      },
+      "action": {
+        "retrieval_route": "page_graph",
+        "retrieval_depth": 8,
+        "graph_activation": false,
+        "graph_depth": 0,
+        "prompt_template": "extraction",
+        "verification_level": "none",
+        "was_exploration": false,
+        "action_confidence": 0.6866665303707123
+      },
+      "reward": 0.7799995017051697,
+      "timestamp": 1782912408.6154892
+    },
+    {
+      "query_id": "bc0222dca010",
+      "state": {
+        "query_type": "structured_lookup",
+        "complexity": "simple",
+        "domain": "financial",
+        "entities": [
+          "Revenue"
+        ],
+        "intent": "extract",
+        "has_relationship_indicators": false,
+        "has_temporal_markers": false,
+        "temporal_markers": [],
+        "confidence": 0.75,
+        "suggested_indexes": [
+          "table",
+          "keyword"
+        ],
+        "requires_graph": false,
+        "requires_table": true
+      },
+      "action": {
+        "retrieval_route": "page_graph",
+        "retrieval_depth": 5,
+        "graph_activation": false,
+        "graph_depth": 0,
+        "prompt_template": "verification",
+        "verification_level": "none",
+        "was_exploration": true,
+        "action_confidence": 0.0
+      },
+      "reward": 0.7799998068809509,
+      "timestamp": 1782912408.615836
     }
   ]
 }
