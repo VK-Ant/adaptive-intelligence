@@ -211,11 +211,23 @@ class AdaptiveAI:
             confidence_threshold=kwargs.get("agentic_threshold", 0.7),
         )
 
+        # v4.0.7: Harness agent
+        from adaptive_intelligence.harness import HarnessAgent
+        self._harness = HarnessAgent()
+
+        # v4.0.7: Loop engineering
+        from adaptive_intelligence.loop import LoopEngineer
+        self._loop_engineer = LoopEngineer(
+            base_warmup=kwargs.get("warmup", 15),
+            base_exploration=kwargs.get("exploration_rate", 0.20),
+        )
+
         logger.info(
             f"Engine initialized: llm={config.llm_backend.value}/{config.llm_model}, "
             f"vectorless={self._vectorless}, domain={config.domain.value}, "
             f"rl={self._rl_algorithm}, reranking={self._reranking}, "
-            f"memory={self._memory_enabled}, context_engineering={self._context_engineering}"
+            f"memory={self._memory_enabled}, context_engineering={self._context_engineering}, "
+            f"harness=True, loop_engineering=True"
         )
 
     def _build_config_from_kwargs(self, kwargs: Dict[str, Any]) -> AdaptiveConfig:
@@ -574,6 +586,66 @@ class AdaptiveAI:
         # v2: attach structured output
         if structured is not None:
             response.structured = structured
+
+        # v4.0.7: Harness evaluation — evaluate every pipeline decision
+        harness_report = None
+        harness_rewards = {}
+        try:
+            graph_ctx = ""
+            if graph_context and isinstance(graph_context, list):
+                graph_ctx = " ".join(str(c) for c in graph_context)
+            elif graph_context:
+                graph_ctx = str(graph_context)
+
+            tool_calls = []
+            if hasattr(response, "tools_called") and response.tools_called:
+                tool_calls = [{"tool": t, "result": ""} for t in response.tools_called]
+
+            harness_report = self._harness.evaluate_pipeline(
+                query=query,
+                answer=answer_text,
+                chunks_used=retrieved_chunks[:policy_action.retrieval_depth],
+                chunks_retrieved=retrieved_chunks,
+                route_chosen=policy_action.retrieval_route.value,
+                depth=policy_action.retrieval_depth,
+                graph_activated=policy_action.graph_activation and self.graph.node_count > 0,
+                graph_context=graph_ctx,
+                tools_called=tool_calls,
+                answer_score=eval_result.composite_score,
+                latency=total_latency,
+            )
+
+            harness_rewards = self._harness.get_granular_rewards(harness_report)
+            response.harness_report = harness_report
+            response.harness_efficiency = harness_report.efficiency
+        except Exception as e:
+            logger.debug(f"Harness evaluation skipped: {e}")
+
+        # v4.0.7: Loop engineering — shape reward and update learning state
+        try:
+            domain_str = analysis.domain if hasattr(analysis, "domain") else "general"
+            qtype_str = analysis.query_type.value if hasattr(analysis.query_type, "value") else str(analysis.query_type)
+
+            # Shape the RL reward using harness signals
+            shaped_reward = self._loop_engineer.shape_reward(
+                eval_result.composite_score, harness_rewards
+            )
+
+            # Update loop state
+            self._loop_engineer.update(
+                domain=domain_str,
+                query_type=qtype_str,
+                strategy=policy_action.retrieval_route.value,
+                score=shaped_reward,
+                harness_rewards=harness_rewards,
+            )
+
+            response.shaped_reward = shaped_reward
+            response.exploration_rate = self._loop_engineer.get_exploration_rate(
+                domain_str, qtype_str
+            )
+        except Exception as e:
+            logger.debug(f"Loop engineering skipped: {e}")
 
         # v4: Update persistent memory
         if self._persistent_memory:

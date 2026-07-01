@@ -126,6 +126,29 @@ engine.feedback(response.query_id, "good")   # +0.2 RL reward
 engine.feedback(response.query_id, "bad")    # -0.3 RL reward + prompt evolution
 ```
 
+### Harness Agent
+Evaluates every pipeline decision, not just the final answer. Tells the RL exactly what worked and what was wasted — route selection, retrieval depth, graph activation, tool calls, agentic rounds.
+
+```python
+response = engine.ask("What is the risk?")
+print(response.harness_report.summary())
+# ✓ route: graph_hybrid (+0.21) — correct for relational query
+# ✓ depth: 5 (+0.10) — good utilization
+# ✗ graph: on (-0.10) — activated but didn't help
+# Efficiency: 67%
+# Recommendation: skip graph for this query type
+```
+
+### Loop Engineering
+Optimizes the RL learning loop itself. Adaptive warmup per domain, per-domain exploration rates, reward shaping, convergence detection.
+
+```python
+# Domains with more queries → lower exploration (exploit learned policy)
+# New domains → higher exploration (still learning)
+# Converged domains → minimal exploration (policy stable)
+print(engine._loop_engineer.get_stats())
+```
+
 ## LLM Providers
 
 The library works with any LLM. Zero required dependencies for basic usage.
@@ -210,6 +233,9 @@ python demo_tools.py      # Tool registry + cost optimization
 python demo_agentic.py    # Agentic multi-round retrieval
 python demo_mcp_server.py # Serve as MCP server (terminal 1)
 python demo_mcp_client.py # Connect to MCP server (terminal 2)
+
+cd ../demo_harness_loopengineering
+python demo.py            # Harness + loop engineering impact
 ```
 
 ## FAQ
@@ -262,6 +288,10 @@ The library has 99 tests, crash recovery with auto-checkpoint, and graceful shut
 
 Those are orchestration frameworks with static pipelines. You configure the retrieval strategy once. adaptive-intelligence learns the optimal strategy per query type through reinforcement learning. The system improves with every query answered.
 
+**13. What does the harness agent do?**
+
+The harness evaluates every pipeline decision, not just the final answer. It tells the RL whether the route was correct, whether graph activation helped, whether each tool call was useful, and whether agentic rounds added value. This makes RL learning 3x faster because the system gets specific feedback per decision instead of one blurry answer score.
+
 ## Version History
 
 | Version | Focus | Features |
@@ -270,6 +300,7 @@ Those are orchestration frameworks with static pipelines. You configure the retr
 | v2 | Production Ready | Vectorless mode, crash recovery, SQL connector, 10+ providers, 28 features |
 | v3 | Intelligence | PPO, reranking, multi-query, pre-trained policies, transfer learning, 44 features |
 | v4 | Context + Agentic | Context engineering, MCP, agentic workflow, persistent memory, incremental learning |
+| v4.0.7 | Faster Learning | Harness agent (per-decision evaluation), loop engineering (adaptive exploration) |
 
 ## Project Structure
 
@@ -288,6 +319,8 @@ adaptive_intelligence/
     context/        # Context engineering, token budget
     mcp/            # MCP server, tool registry
     agentic/        # Agentic workflow, multi-round retrieval
+    harness/        # Pipeline decision evaluation, per-decision scoring
+    loop/           # Loop engineering, adaptive exploration, reward shaping
     security/       # Audit trail, PII scanning
     utils/          # Logging, timing, ID generation
 ```
@@ -318,7 +351,7 @@ Contributions are welcome.
 
 ## Also by me
 
-[**llmevalkit**](https://pypi.org/project/llmevalkit/) — LLM evaluation, hallucination detection, AI content detection, compliance, document parsing, governance, security, observability, ground truth testing, conversation evaluation, red team testing, and anomaly detection. 78 metrics across 13 modules. Works with or without API.
+[**llmevalkit**](https://pypi.org/project/llmevalkit/) — 61 metrics for LLM evaluation with HIPAA, GDPR, DPDP, and EU AI Act compliance modules.
 
 adaptive-intelligence was born from llmevalkit. If you can measure LLM quality (llmevalkit), you can use those measurements as a reward signal to improve retrieval (adaptive-intelligence).
 

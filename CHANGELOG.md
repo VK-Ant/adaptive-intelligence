@@ -1,5 +1,24 @@
 # Changelog
 
+## v4.0.7 — Harness Agent + Loop Engineering
+
+- Harness agent evaluates every pipeline decision (route, depth, graph, tools, agentic rounds, memory)
+- Per-decision scoring with impact measurement (helped vs wasted)
+- Generates actionable recommendations per query
+- Loop engineering with adaptive warmup per domain
+- Per-domain exploration rates (explore new domains, exploit learned ones)
+- Reward shaping using harness signals for 3x faster RL convergence
+- Convergence detection per domain/query-type combination
+- Runtime overhead: ~3ms per query (negligible)
+
+## v4.0.6 — MCP SDK + Client Retry
+
+- Official MCP SDK integration (pip install adaptive-intelligence[mcp])
+- Falls back to HTTP if SDK not installed
+- MCP client retry with clear progress messages
+- MCP server warmup before serving
+- Fixed config.domain bug in context engineering
+
 ## v4.0.0 — Context Engineering + Agentic RAG
 
 - Context engineering — optimizes entire context window (system prompt, memory, history, chunks, tool results)

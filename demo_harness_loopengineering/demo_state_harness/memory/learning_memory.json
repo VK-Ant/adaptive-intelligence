@@ -1,0 +1,67 @@
+{
+  "routing_patterns": {
+    "structured_lookup:financial": {
+      "query_type": "structured_lookup",
+      "domain": "financial",
+      "best_route": "page_bm25",
+      "success_rate": 0.7799997067451478,
+      "total_queries": 6
+    },
+    "factual:general": {
+      "query_type": "factual",
+      "domain": "general",
+      "best_route": "keyword_only",
+      "success_rate": 0.6716796732870738,
+      "total_queries": 5
+    }
+  },
+  "graph_thresholds": {},
+  "route_performance": {
+    "structured_lookup:financial:table_first": {
+      "total": 8,
+      "success": 7,
+      "avg_score": 0.7689496356169384
+    },
+    "relational:operational:page_graph": {
+      "total": 1,
+      "success": 1,
+      "avg_score": 0.7043983163674674
+    },
+    "comparative:financial:page_bm25": {
+      "total": 1,
+      "success": 0,
+      "avg_score": 0.6383993173281353
+    },
+    "factual:general:keyword_only": {
+      "total": 5,
+      "success": 1,
+      "avg_score": 0.6716796732870738
+    },
+    "factual:healthcare:keyword_only": {
+      "total": 1,
+      "success": 0,
+      "avg_score": 0.6975996252854664
+    },
+    "factual:financial:keyword_only": {
+      "total": 1,
+      "success": 1,
+      "avg_score": 0.7799996074040731
+    },
+    "factual:general:page_graph": {
+      "total": 1,
+      "success": 0,
+      "avg_score": 0.5975997115135193
+    },
+    "structured_lookup:financial:page_bm25": {
+      "total": 6,
+      "success": 6,
+      "avg_score": 0.7799997067451478
+    },
+    "structured_lookup:financial:page_graph": {
+      "total": 1,
+      "success": 1,
+      "avg_score": 0.7799998013178507
+    }
+  },
+  "model_performance": {}
+}
