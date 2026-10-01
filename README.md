@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/VK-Ant/adaptive-intelligence/main/docs/images/image_ai.png" alt="adaptive-intelligence" width="100%">
+<img src="https://raw.githubusercontent.com/VK-Ant/adaptive-intelligence/main/docs/images/image_aiv1.png" alt="adaptive-intelligence" width="100%">
 
 # adaptive-intelligence
 
