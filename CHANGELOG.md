@@ -1,5 +1,21 @@
 # Changelog
 
+## v4.0.8 — LM Cache (Exact + Semantic)
+
+- Exact cache: identical queries return cached response instantly (dict lookup)
+- Semantic cache: similar queries matched via embedding cosine similarity
+- Configurable similarity threshold (default 0.92)
+- Built-in zero-dependency embeddings (character trigrams)
+- Plug in sentence-transformers or OpenAI embeddings via embed_fn
+- External adapter support: Redis, GPTCache, or any custom backend
+- RedisAdapter included (pip install adaptive-intelligence[cache])
+- Cache persists to disk across sessions
+- Only caches high-quality responses (composite_score > 0.5)
+- Auto-eviction of expired entries + LRU overflow handling
+- Cache stats: hit rate, exact/semantic hits, avg similarity
+- cache_stats(), cache_clear(), cache_display() on engine
+- Zero required dependencies — works with built-in dict
+
 ## v4.0.7 — Harness Agent + Loop Engineering
 
 - Harness agent evaluates every pipeline decision (route, depth, graph, tools, agentic rounds, memory)

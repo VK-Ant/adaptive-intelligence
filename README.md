@@ -10,9 +10,6 @@
 [![Python](https://img.shields.io/pypi/pyversions/adaptive-intelligence)](https://pypi.org/project/adaptive-intelligence/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
 [![Paper](https://img.shields.io/badge/Paper-ResearchGate-00CCBB)](https://www.researchgate.net/publication/405076088)
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/VK-Ant/adaptive-intelligence/blob/main/notebooks/adaptive_intelligence_v4_demo.ipynb)
-
-[PyPI](https://pypi.org/project/adaptive-intelligence/) · [Paper](https://www.researchgate.net/publication/405076088) · [Portfolio](https://vk-ant.github.io/Venkatkumar/) · [llmevalkit](https://pypi.org/project/llmevalkit/)
 
 </div>
 
@@ -39,6 +36,7 @@ pip install adaptive-intelligence                # Zero deps (Ollama, no-LLM mod
 pip install adaptive-intelligence[vector]         # + ChromaDB vector search
 pip install adaptive-intelligence[openai]         # + Any OpenAI-compatible API
 pip install adaptive-intelligence[huggingface]    # + Local HuggingFace models
+pip install adaptive-intelligence[cache]          # + Redis cache backend
 pip install adaptive-intelligence[all]            # Everything
 ```
 
@@ -126,8 +124,6 @@ engine.feedback(response.query_id, "good")   # +0.2 RL reward
 engine.feedback(response.query_id, "bad")    # -0.3 RL reward + prompt evolution
 ```
 
-### Harness Agent & Looping Engineering - [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/VK-Ant/adaptive-intelligence/blob/main/notebooks/adaptive_intelligence_harness_demo.ipynb)
-
 ### Harness Agent
 Evaluates every pipeline decision, not just the final answer. Tells the RL exactly what worked and what was wasted — route selection, retrieval depth, graph activation, tool calls, agentic rounds.
 
@@ -149,6 +145,41 @@ Optimizes the RL learning loop itself. Adaptive warmup per domain, per-domain ex
 # New domains → higher exploration (still learning)
 # Converged domains → minimal exploration (policy stable)
 print(engine._loop_engineer.get_stats())
+```
+
+### LM Cache
+Cache LLM responses to skip redundant calls. Exact matching for identical queries, semantic matching for similar ones. Plug in Redis or any external backend.
+
+```python
+# Exact cache (default, zero deps)
+engine = AdaptiveAI(cache=True)
+
+# Semantic cache — similar queries return cached response
+engine = AdaptiveAI(cache=True, cache_mode="semantic", cache_threshold=0.92)
+
+# Both exact + semantic
+engine = AdaptiveAI(cache=True, cache_mode="both")
+
+# Redis backend
+from adaptive_intelligence.cache import RedisAdapter
+engine = AdaptiveAI(cache=True, cache_adapter=RedisAdapter(host="localhost"))
+
+# Custom adapter
+from adaptive_intelligence.cache import CacheAdapter
+class MyCache(CacheAdapter):
+    def get(self, key): ...
+    def set(self, key, value, ttl): ...
+    def delete(self, key): ...
+
+engine = AdaptiveAI(cache=True, cache_adapter=MyCache())
+
+# Check cache stats
+print(engine.cache_display())
+# LM Cache Status
+#   Mode:           both
+#   Entries:        42
+#   Cache hits:     18 (43.2%)
+#   Cache misses:   24
 ```
 
 ## LLM Providers
@@ -188,7 +219,7 @@ engine = AdaptiveAI(llm_backend="huggingface", llm_model="Qwen/Qwen2.5-1.5B-Inst
 engine = AdaptiveAI(llm_backend="none")
 ```
 
-### API Key based one
+### Paid
 
 ```python
 # OpenAI
@@ -353,13 +384,15 @@ Contributions are welcome.
 
 ## Also by me
 
-[**llmevalkit**](https://pypi.org/project/llmevalkit/) — 78 metrics for LLM evaluation with HIPAA, GDPR, DPDP, and EU AI Act compliance modules.
+[**llmevalkit**](https://pypi.org/project/llmevalkit/) — 61 metrics for LLM evaluation with HIPAA, GDPR, DPDP, and EU AI Act compliance modules.
 
 adaptive-intelligence was born from llmevalkit. If you can measure LLM quality (llmevalkit), you can use those measurements as a reward signal to improve retrieval (adaptive-intelligence).
 
+Ant Intelligence Ecosystem Documentation - https://vk-ant.github.io/ant-intelligence-ecosystem/#home
+
 ## Author
 
-**Venkatkumar Rajan** · [@VK_Venkatkumar](https://linkedin.com/in/venkatkumarvk) · [Portfolio](https://vk-ant.github.io/Venkatkumar/)
+**Venkatkumar Rajan** · [Portfolio](https://vk-ant.github.io/Venkatkumar/)
 
 ## License
 

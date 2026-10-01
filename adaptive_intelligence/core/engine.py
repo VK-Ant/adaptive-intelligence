@@ -77,7 +77,7 @@ class AdaptiveAI:
 
         # Setup
         setup_logging(config.log_level, config.log_file)
-        logger.info(f"Initializing Adaptive Intelligence v4.0.0")
+        logger.info(f"Initializing Adaptive Intelligence v4.0.8")
 
         self._storage_dir = Path(config.storage_dir)
         self._storage_dir.mkdir(parents=True, exist_ok=True)
@@ -222,12 +222,28 @@ class AdaptiveAI:
             base_exploration=kwargs.get("exploration_rate", 0.20),
         )
 
+        # v4.0.8: LM Cache
+        self._cache_enabled = kwargs.get("cache", False)
+        self._cache = None
+        if self._cache_enabled:
+            from adaptive_intelligence.cache import CacheManager
+            cache_mode = kwargs.get("cache_mode", "exact")
+            self._cache = CacheManager(
+                mode=cache_mode,
+                semantic_threshold=kwargs.get("cache_threshold", 0.92),
+                max_entries=kwargs.get("cache_max_entries", 1000),
+                default_ttl=kwargs.get("cache_ttl", 3600.0),
+                embed_fn=kwargs.get("cache_embed_fn", None),
+                adapter=kwargs.get("cache_adapter", None),
+                persist_dir=str(self._storage_dir / "cache"),
+            )
+
         logger.info(
             f"Engine initialized: llm={config.llm_backend.value}/{config.llm_model}, "
             f"vectorless={self._vectorless}, domain={config.domain.value}, "
             f"rl={self._rl_algorithm}, reranking={self._reranking}, "
             f"memory={self._memory_enabled}, context_engineering={self._context_engineering}, "
-            f"harness=True, loop_engineering=True"
+            f"harness=True, loop_engineering=True, cache={self._cache_enabled}"
         )
 
     def _build_config_from_kwargs(self, kwargs: Dict[str, Any]) -> AdaptiveConfig:
@@ -387,6 +403,21 @@ class AdaptiveAI:
 
         # Step 1: Query Understanding
         analysis = self.trigger.analyze(query)
+
+        # Step 1.5: Cache lookup (skip full pipeline if hit)
+        if self._cache:
+            cached = self._cache.lookup(query)
+            if cached:
+                logger.info(f"Cache hit for query: {query[:50]}...")
+                response = AdaptiveResponse(
+                    answer=cached.answer,
+                    confidence=cached.confidence,
+                    query_id=query_id,
+                    query_analysis=analysis.to_dict(),
+                )
+                response.cache_hit = True
+                response.cache_strategy = cached.strategy
+                return response
 
         # Step 2: RL Policy Decision
         policy_action = self.rl.decide(analysis)
@@ -586,6 +617,17 @@ class AdaptiveAI:
         # v2: attach structured output
         if structured is not None:
             response.structured = structured
+
+        # v4.0.8: Store in cache
+        if self._cache and eval_result.composite_score > 0.5:
+            self._cache.store(
+                query=query,
+                answer=answer_text,
+                confidence=eval_result.composite_score,
+                strategy=policy_action.retrieval_route.value,
+                metadata={"query_type": analysis.query_type.value},
+            )
+        response.cache_hit = False
 
         # v4.0.7: Harness evaluation — evaluate every pipeline decision
         harness_report = None
@@ -990,9 +1032,30 @@ class AdaptiveAI:
         """Graceful shutdown — save everything."""
         try:
             self._checkpoint()
+            if self._cache:
+                self._cache.save()
             logger.info("Graceful shutdown: state saved")
         except Exception:
             pass
+
+    # ─── v4.0.8: CACHE ───────────────────────────────────
+
+    def cache_stats(self) -> Dict[str, Any]:
+        """Get cache performance statistics."""
+        if self._cache:
+            return self._cache.stats.to_dict()
+        return {"enabled": False}
+
+    def cache_clear(self) -> None:
+        """Clear the LM cache."""
+        if self._cache:
+            self._cache.clear()
+
+    def cache_display(self) -> str:
+        """Human-readable cache status."""
+        if self._cache:
+            return self._cache.display()
+        return "LM Cache: disabled"
 
     # ─── v3: EXPORT / IMPORT / AB TEST ───────────────────
 
